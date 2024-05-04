@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-		staleTime: 4 * 1000,
-		refetchInterval: 4 * 1000,
+        staleTime: 10 * 1000,
+        refetchInterval: 10 * 1000,
       },
     },
   });
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools client={queryClient} />
       {children}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

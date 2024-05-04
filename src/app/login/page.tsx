@@ -1,18 +1,3 @@
-// import { login, signup } from './actions'
-
-// export default function LoginPage() {
-//   return (
-    // <form>
-    //   <label htmlFor="email">Email:</label>
-    //   <input id="email" name="email" type="email" required />
-    //   <label htmlFor="password">Password:</label>
-    //   <input id="password" name="password" type="password" required />
-    //   <button formAction={login}>Log in</button>
-    //   <button formAction={signup}>Sign up</button>
-    // </form>
-//   )
-// }
-
 import Image from "next/image";
 import Link from "next/link";
 
@@ -24,7 +9,7 @@ import { login, loginWithMagicLink } from "./actions";
 
 export default function Page() {
   return (
-    <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+    <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px] h-full bg-green-300">
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
@@ -53,7 +38,7 @@ export default function Page() {
             <Button formAction={login} className="w-full">
               Login
             </Button>
-			<Button formAction={loginWithMagicLink} className="w-full">
+            <Button formAction={loginWithMagicLink} className="w-full">
               Login with magic link
             </Button>
           </form>
