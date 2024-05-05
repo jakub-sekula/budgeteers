@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
 	}
 
 	revalidatePath('/', 'layout')
-	redirect('/')
+	redirect('/private')
 }
 
 export async function loginWithMagicLink(formData: FormData) {
@@ -33,7 +33,14 @@ export async function loginWithMagicLink(formData: FormData) {
 	// in practice, you should validate your inputs
 	const data = {
 		email: formData.get('email') as string,
+		options: {
+			// set this to false if you do not want the user to be automatically signed up
+			shouldCreateUser: true,
+			// emailRedirectTo: 'http://localhost:3000/private',
+		  },
 	}
+
+	console.log(data)
 
 	const { error } = await supabase.auth.signInWithOtp(data)
 
@@ -43,5 +50,5 @@ export async function loginWithMagicLink(formData: FormData) {
 	}
 
 	revalidatePath('/', 'layout')
-	redirect('/')
+	redirect('/login/check-email')
 }

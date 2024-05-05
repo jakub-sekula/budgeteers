@@ -8,7 +8,9 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Categories from "./Categories";
 
-export const fetchCategories = async () => {
+export const dynamic = 'force-dynamic' 
+
+const fetchCategories = async () => {
   const supabase = createClient();
   return await supabase.from("categories").select("*");
 };
@@ -27,6 +29,9 @@ export default async function page() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        Categories
+      </h1>
       <Categories />
     </HydrationBoundary>
   );

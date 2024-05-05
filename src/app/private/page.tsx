@@ -1,6 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import Profile from "./Profile";
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from "@tanstack/react-query";
 
+export const dynamic = 'force-dynamic' 
 
 export default async function PrivatePage() {
   const supabase = createClient();
@@ -10,8 +17,24 @@ export default async function PrivatePage() {
     redirect("/login");
   }
 
+  
+
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: ["userData"],
+    queryFn: async () => {
+      return await supabase.from("users").select("*");
+    },
+  });
+
   return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        Profile
+      </h1>
+      <Profile />
       <pre>{JSON.stringify(data.user, null, 2)}</pre>
+    </HydrationBoundary>
   );
 }
 

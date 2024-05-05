@@ -33,7 +33,7 @@ export default function Page() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input id="password" type="password" name="password" required />
+              <Input id="password" type="password" name="password"  />
             </div>
             <Button formAction={login} className="w-full">
               Login

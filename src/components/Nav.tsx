@@ -12,15 +12,19 @@ import {
 } from "@/components/ui/navigation-menu";
 import clsx from "clsx";
 import Link from "next/link";
+import { Button } from "./ui/button";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export default function Nav() {
+  const supabase = createClient();
   const router = useRouter();
 
   return (
     <header className="w-full p-4 flex justify-center bg-white">
       <div className="max-w-6xl w-full">
-        <NavigationMenu>
+        <NavigationMenu className="w-full justify-between max-w-full">
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/transactions" legacyBehavior passHref>
@@ -50,6 +54,14 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
+              <Link href="/budgets" legacyBehavior passHref>
+                <NavigationMenuLink
+                  className={clsx(navigationMenuTriggerStyle())}
+                >
+                  Budgets
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem><NavigationMenuItem>
               <Link href="/private" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
@@ -59,6 +71,15 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
+          <Button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  router.push("/login");
+                  router.refresh()
+                }}
+              >
+                Sign out
+              </Button>
         </NavigationMenu>
       </div>
     </header>
