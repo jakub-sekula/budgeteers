@@ -27,7 +27,12 @@ export default function Nav() {
         <NavigationMenu className="w-full justify-between max-w-full">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link href="/transactions" legacyBehavior passHref>
+              <Link
+                prefetch={true}
+                href="/transactions"
+                legacyBehavior
+                passHref
+              >
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
                 >
@@ -36,7 +41,7 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/accounts" legacyBehavior passHref>
+              <Link prefetch={true} href="/accounts" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
                 >
@@ -45,7 +50,7 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/categories" legacyBehavior passHref>
+              <Link prefetch={true} href="/categories" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
                 >
@@ -54,15 +59,16 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/budgets" legacyBehavior passHref>
+              <Link prefetch={true} href="/budgets" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
                 >
                   Budgets
                 </NavigationMenuLink>
               </Link>
-            </NavigationMenuItem><NavigationMenuItem>
-              <Link href="/private" legacyBehavior passHref>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link prefetch={true} href="/private" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
                 >
@@ -72,14 +78,14 @@ export default function Nav() {
             </NavigationMenuItem>
           </NavigationMenuList>
           <Button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  router.push("/login");
-                  router.refresh()
-                }}
-              >
-                Sign out
-              </Button>
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push("/login");
+              router.refresh();
+            }}
+          >
+            Sign out
+          </Button>
         </NavigationMenu>
       </div>
     </header>

@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow,
   } from "@/components/ui/table";
+import CategoryForm from "./CategoryForm";
   
   export default function loading() {
 	return (
@@ -15,6 +16,7 @@ import {
 	  <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
 		  Categories
 		</h1>
+    <CategoryForm />
 	  <Table className="bg-white rounded-md ">
 		<TableHeader>
 		<TableRow>

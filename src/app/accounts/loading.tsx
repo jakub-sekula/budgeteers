@@ -8,20 +8,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AccountForm from "./AccountForm";
 
 export default function loading() {
   return (
     <>
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-        Budgets
+        Accounts
       </h1>
+      <AccountForm />
       <Table className="bg-white rounded-md ">
         <TableHeader>
           <TableRow>
-            <TableHead>Starts on</TableHead>
-            <TableHead>Ends on</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Budget</TableHead>
+          <TableHead>Name</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -30,16 +31,13 @@ export default function loading() {
             .map((_, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  <Skeleton className="w-[20px] h-4 rounded-full" />
+                  <Skeleton className="w-[20x] h-4 rounded-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="w-[20px] h-4 rounded-full" />
+                  <Skeleton className="w-[20x] h-4 rounded-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="w-[20px] h-4 rounded-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="w-[20px] h-4 rounded-full" />
+                  <Skeleton className="w-[20x] h-4 rounded-full" />
                 </TableCell>
               </TableRow>
             ))}

@@ -7,13 +7,8 @@ import {
 } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-
-export const dynamic = 'force-dynamic' 
-
-const fetchAccounts = async () => {
-  const supabase = createClient();
-  return await supabase.from("accounts").select("*");
-};
+import { fetchAccounts } from "@/utils/supabase/api";
+import AccountForm from "./AccountForm";
 
 export default async function page() {
   const supabase = createClient();
@@ -25,10 +20,14 @@ export default async function page() {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["accounts"],
-    queryFn: fetchAccounts,
+    queryFn: async () => await fetchAccounts(supabase),
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        Accounts
+      </h1>
+      <AccountForm />
       <Accounts />
     </HydrationBoundary>
   );

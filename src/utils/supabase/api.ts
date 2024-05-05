@@ -27,3 +27,9 @@ export const fetchBudgets = async (client: SupabaseClient<Database>) => {
 	return budgets
 }
 
+
+export const fetchAccounts = async (client: SupabaseClient<Database>) => {
+	return await client.from("accounts").select("*");
+};
+
+

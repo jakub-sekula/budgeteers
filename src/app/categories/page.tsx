@@ -7,6 +7,7 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Categories from "./Categories";
+import CategoryForm from "./CategoryForm";
 
 export const dynamic = 'force-dynamic' 
 
@@ -32,6 +33,7 @@ export default async function page() {
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
         Categories
       </h1>
+      <CategoryForm />
       <Categories />
     </HydrationBoundary>
   );
