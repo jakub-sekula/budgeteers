@@ -32,4 +32,7 @@ export const fetchAccounts = async (client: SupabaseClient<Database>) => {
 	return await client.from("accounts").select("*");
 };
 
+export const fetchCategories = async (client: SupabaseClient<Database>) => {
+	return await client.from("categories").select("*");
+};
 

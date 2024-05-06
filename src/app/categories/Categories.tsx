@@ -16,15 +16,14 @@ import {
 import { Tables } from "@/types/supabase";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { fetchCategories } from "@/utils/supabase/api";
 
 export default function Categories() {
+  const supabase = createClient()
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["categories"],
-    queryFn: async () => {
-      const supabase = createClient();
-      return await supabase.from("categories").select("*");
-    },
+    queryFn: async () => fetchCategories(supabase)
   });
 
 
