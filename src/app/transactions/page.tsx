@@ -31,8 +31,10 @@ export default async function page() {
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
           Transactions
         </h1>
-        <TransactionForm />
-        <Transactions queryString={queryString} />
+        <div className="flex gap-6 w-full items-start">
+          <TransactionForm />
+          <Transactions queryString={queryString} />
+        </div>
       </HydrationBoundary>
     </>
   );

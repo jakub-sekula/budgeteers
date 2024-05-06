@@ -34,7 +34,6 @@ export default function Categories() {
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) return console.log(error);
     queryClient.invalidateQueries({ queryKey: ["categories"] });
-    queryClient.refetchQueries({ queryKey: ["categories"] });
   };
 
   return (
