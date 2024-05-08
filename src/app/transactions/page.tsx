@@ -7,8 +7,7 @@ import {
 
 import { createClient } from "@/utils/supabase/server";
 import { fetchTransactions } from "@/utils/supabase/api";
-import Transactions from "./Transactions";
-import TransactionForm from "./TransactionForm";
+import TransactionsTable from "./TransactionsTable";
 
 export default async function page() {
   const queryString = "*, categories(name)";
@@ -28,13 +27,7 @@ export default async function page() {
   return (
     <>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-          Transactions
-        </h1>
-        <div className="flex gap-6 w-full items-start">
-          <TransactionForm />
-          <Transactions queryString={queryString} />
-        </div>
+          <TransactionsTable queryString={queryString} />
       </HydrationBoundary>
     </>
   );

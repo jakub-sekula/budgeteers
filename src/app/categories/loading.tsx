@@ -31,19 +31,19 @@ import CategoryForm from "./CategoryForm";
 		{Array(10).fill(1).map((_, index) => (
             <TableRow key={index}>
               <TableCell>
-                <Skeleton className="w-[20x] h-4 rounded-full" />
+                <Skeleton className="w-[20px] h-4 rounded-full" />
               </TableCell>
               <TableCell>
                 <Skeleton className="size-8 rounded-full" />
               </TableCell>
               <TableCell>
-                <Skeleton className="w-[20x] h-4 rounded-full" />
+                <Skeleton className="w-[20px] h-4 rounded-full" />
               </TableCell>
               <TableCell>
-                <Skeleton className="w-[20x] h-4 rounded-full" />
+                <Skeleton className="w-[20px] h-4 rounded-full" />
               </TableCell>
               <TableCell>
-                <Skeleton className="w-[20x] h-4 rounded-full" />
+                <Skeleton className="w-[20px] h-4 rounded-full" />
               </TableCell>
             </TableRow>
           ))}

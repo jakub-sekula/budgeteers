@@ -31,13 +31,13 @@ export default function loading() {
             .map((_, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  <Skeleton className="w-[20x] h-4 rounded-full" />
+                  <Skeleton className="w-[20px] h-4 rounded-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="w-[20x] h-4 rounded-full" />
+                  <Skeleton className="w-[20px] h-4 rounded-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="w-[20x] h-4 rounded-full" />
+                  <Skeleton className="w-[20px] h-4 rounded-full" />
                 </TableCell>
               </TableRow>
             ))}

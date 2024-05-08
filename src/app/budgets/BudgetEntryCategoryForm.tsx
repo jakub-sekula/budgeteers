@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { FormEvent, useEffect, useRef } from "react";
+import React, { FormEvent, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 import {
@@ -22,50 +22,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fetchAccounts, fetchCategories } from "@/utils/supabase/api";
 import { Tables } from "@/types/supabase";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useBudgetContext } from "./BudgetContext";
+import { fetchCategories } from "@/utils/supabase/api";
 
-export default function TransactionForm() {
+export default function BudgetEntryCategoryForm() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const supabase = createClient();
   const ref = useRef<HTMLFormElement>(null);
+
+  const { selectedBudget, selectedBudgetEntry } = useBudgetContext();
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
     queryFn: async () => fetchCategories(supabase),
   });
 
-  const accountsQuery = useQuery({
-    queryKey: ["accounts"],
-    queryFn: async () => fetchAccounts(supabase),
-  });
-
-  const { data: accounts } = accountsQuery?.data ?? {};
   const { data: categories } = categoriesQuery?.data ?? {};
 
+  
+
   const { mutate } = useMutation({
-    mutationFn: async (formData: FormData) => {
+    mutationFn: async (
+      budgetCategory: Omit<
+        Tables<"budget_categories">,
+        "created_at" | "id" | "icon"
+      >
+    ) => {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) throw new Error("No user found!");
-
-      const transaction = {
-        user_id: user.id,
-        category_id: formData.get("categoryId") as string,
-        from_account: (formData.get("fromAccount") as string) || undefined,
-        to_account: (formData.get("toAccount") as string) || undefined,
-        type: formData.get("type") as string,
-        description: formData.get("description") as string,
-        amount: parseFloat(formData.get("amount") as string) * 100,
-      };
+      console.log(budgetCategory);
 
       const { data, error } = await supabase
-        .from("transactions")
-        .insert([transaction])
+        .from("budget_categories")
+        .insert([budgetCategory])
         .select()
         .single();
 
@@ -75,12 +66,9 @@ export default function TransactionForm() {
 
       return data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data: Tables<"budget_categories">) => {
       console.log(data);
-      toast({ title: "Successfully created new transaction" });
-      await queryClient.invalidateQueries({
-        queryKey: ["transactions"],
-      });
+      toast({ title: "Successfully created new budget" });
     },
     onError: (error) => {
       console.log(error);
@@ -90,29 +78,65 @@ export default function TransactionForm() {
         description: error.message,
       });
     },
+    onSettled: async () =>
+      await queryClient.invalidateQueries({
+        queryKey: ["budget_entries", selectedBudget?.id],
+      }),
   });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await mutate(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("You must be logged in!");
+
+    const budgetEntry: Omit<
+      Tables<"budget_categories">,
+      "created_at" | "id" | "icon"
+    > = {
+      budget_entry_id: selectedBudgetEntry.id,
+      user_id: user.id,
+      category_id: formData.get("categoryId") as string,
+      description: formData.get("description") as string,
+      name: categories?.find(category => category.id === formData.get("categoryId"))?.name as string,
+      hidden: formData.get("hidden") ? true : false,
+      amount: parseFloat(formData.get("amount") as string) * 100,
+    };
+
+    await mutate(budgetEntry);
   };
 
   return (
     <>
-      <Card className="w-[350px] shrink-0">
+      <Card className="col-span-4 shrink-0">
         <CardHeader>
-          <CardTitle>Add new transaction</CardTitle>
+          <CardTitle>Add category for {selectedBudgetEntry?.name}</CardTitle>
+          <CardDescription>For example May 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} id="categoryForm" ref={ref}>
+          <form onSubmit={handleSubmit} id="budgetEntryCategoryForm" ref={ref}>
             <div className="grid w-full items-center gap-4">
+              {/* <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="description">Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Budget name"
+                  required
+                />
+              </div> */}
+
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="description">Description</Label>
                 <Input
+                  type="text"
                   id="description"
                   name="description"
-                  placeholder="Transaction description"
-                  required
+                  placeholder="Description"
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
@@ -127,17 +151,8 @@ export default function TransactionForm() {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="type">Transaction type</Label>
-                <Select name="type" defaultValue="expense" required>
-                  <SelectTrigger id="type">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    <SelectItem value="expense">Expense</SelectItem>
-                    <SelectItem value="income">Income</SelectItem>
-                    <SelectItem value="transfer">Transfer</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="hidden">Hidden?</Label>
+                <Checkbox id="hidden" />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="categoryId">Category</Label>
@@ -149,36 +164,6 @@ export default function TransactionForm() {
                     {categories?.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="fromAccount">From account</Label>
-                <Select name="fromAccount">
-                  <SelectTrigger id="fromAccount">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    {accounts?.map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="toAccount">To account</Label>
-                <Select name="toAccount">
-                  <SelectTrigger id="toAccount">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    {accounts?.map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -197,7 +182,7 @@ export default function TransactionForm() {
           >
             Cancel
           </Button>
-          <Button type="submit" form="categoryForm">
+          <Button type="submit" form="budgetEntryCategoryForm">
             Add
           </Button>
         </CardFooter>

@@ -11,13 +11,15 @@ export const fetchTransactions = async (client: SupabaseClient<Database>) => {
 	let transactions = await client
 		.from('transactions')
 		.select(transactionsQueryString)
+		.is('budget_category_id', null)
 
 	return transactions
 }
 
-const budgetsQueryString = "*, budget_entries (*, categories(name,color,icon))"
-let budgetsQuery = supabase.from("budgets").select(budgetsQueryString);
-export type BudgetsWithEntries = QueryData<typeof budgetsQuery>;
+const budgetsQueryString = "*, budget_entries (name, description, id)"
+let budgetsQuery = supabase.from("budgets").select(budgetsQueryString).single();
+export type BudgetWithEntries = QueryData<typeof budgetsQuery>;
+export type BudgetsWithEntries = BudgetWithEntries[];
 
 export const fetchBudgets = async (client: SupabaseClient<Database>) => {
 	let budgets = await client
@@ -26,6 +28,41 @@ export const fetchBudgets = async (client: SupabaseClient<Database>) => {
 
 	return budgets
 }
+
+export const fetchBudget = async (client: SupabaseClient<Database>, id: string) => {
+	let budget = await client
+		.from('budgets')
+		.select(budgetsQueryString)
+		.eq('id', id)
+		.single()
+
+	return budget
+}
+
+const budgetEntriesQueryString = "*, budget_categories (*, transactions (type,amount,description,id))"
+let budgetEntriesQuery = supabase.from("budget_entries").select(budgetEntriesQueryString).single();
+export type BudgetEntryWithCategories = QueryData<typeof budgetEntriesQuery>;
+export type BudgetEntriesWithCategories = BudgetEntryWithCategories[];
+
+export const fetchBudgetEntries = async (client: SupabaseClient<Database>, budgetId: string) => {
+	let budgets = await client
+		.from('budget_entries')
+		.select(budgetEntriesQueryString)
+		.eq('budget_id', budgetId)
+
+	return budgets
+}
+
+export const fetchBudgetEntry = async (client: SupabaseClient<Database>, entryId: string) => {
+	let budgets = await client
+		.from('budget_entries')
+		.select(budgetEntriesQueryString)
+		.eq('id', entryId)
+		.single()
+
+	return budgets
+}
+
 
 
 export const fetchAccounts = async (client: SupabaseClient<Database>) => {

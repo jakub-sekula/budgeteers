@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-export default function Transactions({ queryString }: { queryString: string }) {
+export default function TransactionsTable({ queryString }: { queryString: string }) {
   const supabase = createClient();
   const queryClient = useQueryClient();
   const query = useQuery({
@@ -43,7 +43,7 @@ export default function Transactions({ queryString }: { queryString: string }) {
   };
 
   return (
-    <Card>
+    <Card className="w-4/5">
       <Table>
         <TableHeader>
           <TableRow>

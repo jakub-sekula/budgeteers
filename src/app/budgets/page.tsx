@@ -6,11 +6,12 @@ import {
 } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import Budgets from "./Budgets";
 import { fetchBudgets } from "@/utils/supabase/api";
+import BudgetsTable from "./BudgetsTable";
+import BudgetEntriesTable from "./BudgetEntriesTable";
+import BudgetEntryCategoryForm from "./BudgetEntryCategoryForm";
 
 export default async function page() {
-  const queryString = "*, budget_entries (*, categories(name,color,icon))";
   const supabase = createClient();
 
   const { data, error } = await supabase.auth.getUser();
@@ -22,12 +23,14 @@ export default async function page() {
     queryKey: ["budgets"],
     queryFn: async () => fetchBudgets(supabase),
   });
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+      <h1 className="col-span-full scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
         Budgets
       </h1>
-      <Budgets />
+      <BudgetsTable />
+      <BudgetEntryCategoryForm />
     </HydrationBoundary>
   );
 }
