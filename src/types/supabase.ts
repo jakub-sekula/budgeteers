@@ -86,7 +86,8 @@ export type Database = {
       budget_categories: {
         Row: {
           amount: number
-          budget_entry_id: string
+          budget_entry_id: string | null
+          budget_id: string | null
           category_id: string
           created_at: string
           description: string | null
@@ -94,11 +95,13 @@ export type Database = {
           icon: string | null
           id: string
           name: string | null
+          type: Database["public"]["Enums"]["transaction_types"] | null
           user_id: string
         }
         Insert: {
           amount?: number
-          budget_entry_id: string
+          budget_entry_id?: string | null
+          budget_id?: string | null
           category_id: string
           created_at?: string
           description?: string | null
@@ -106,11 +109,13 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string | null
+          type?: Database["public"]["Enums"]["transaction_types"] | null
           user_id: string
         }
         Update: {
           amount?: number
-          budget_entry_id?: string
+          budget_entry_id?: string | null
+          budget_id?: string | null
           category_id?: string
           created_at?: string
           description?: string | null
@@ -118,6 +123,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string | null
+          type?: Database["public"]["Enums"]["transaction_types"] | null
           user_id?: string
         }
         Relationships: [
@@ -126,6 +132,13 @@ export type Database = {
             columns: ["budget_entry_id"]
             isOneToOne: false
             referencedRelation: "budget_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_categories_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
             referencedColumns: ["id"]
           },
           {
@@ -238,30 +251,39 @@ export type Database = {
           color: string | null
           created_at: string
           default: boolean | null
+          hidden: boolean
           icon: string | null
           id: string
           name: string
-          transaction_type: string | null
+          transaction_type:
+            | Database["public"]["Enums"]["transaction_types"]
+            | null
           user_id: string | null
         }
         Insert: {
           color?: string | null
           created_at?: string
           default?: boolean | null
+          hidden?: boolean
           icon?: string | null
           id?: string
           name: string
-          transaction_type?: string | null
+          transaction_type?:
+            | Database["public"]["Enums"]["transaction_types"]
+            | null
           user_id?: string | null
         }
         Update: {
           color?: string | null
           created_at?: string
           default?: boolean | null
+          hidden?: boolean
           icon?: string | null
           id?: string
           name?: string
-          transaction_type?: string | null
+          transaction_type?:
+            | Database["public"]["Enums"]["transaction_types"]
+            | null
           user_id?: string | null
         }
         Relationships: [
@@ -369,29 +391,35 @@ export type Database = {
         Row: {
           avatar: string | null
           default_budget_id: string | null
-          encrypted_master_key: string | null
+          encrypted_master_key_b64: string | null
           first_name: string | null
           id: string
           is_premium: boolean
+          iv_b64: string | null
           last_name: string | null
+          salt_b64: string | null
         }
         Insert: {
           avatar?: string | null
           default_budget_id?: string | null
-          encrypted_master_key?: string | null
+          encrypted_master_key_b64?: string | null
           first_name?: string | null
           id?: string
           is_premium?: boolean
+          iv_b64?: string | null
           last_name?: string | null
+          salt_b64?: string | null
         }
         Update: {
           avatar?: string | null
           default_budget_id?: string | null
-          encrypted_master_key?: string | null
+          encrypted_master_key_b64?: string | null
           first_name?: string | null
           id?: string
           is_premium?: boolean
+          iv_b64?: string | null
           last_name?: string | null
+          salt_b64?: string | null
         }
         Relationships: [
           {
@@ -418,7 +446,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      transaction_types: "expense" | "income" | "transfer"
     }
     CompositeTypes: {
       [_ in never]: never

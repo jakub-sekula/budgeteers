@@ -7,9 +7,15 @@ import {
 
 import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import Image from "next/image";
 import { splitExt } from "@/lib/utils";
+import {
+  encryptMasterKey,
+  generateKeyEncryptionKey,
+  generateMasterKey,
+  getPasswordKey,
+} from "@/lib/encrypt";
 
 export default function Profile() {
   const queryClient = useQueryClient();
@@ -64,8 +70,63 @@ export default function Profile() {
     }
   };
 
+  const keySubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    console.log(Object.fromEntries(formData));
+
+    if (!formData.get("pin")) return;
+
+    const passwordKey = await getPasswordKey(formData.get("pin") as string);
+
+    const masterKey = await generateMasterKey();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    console.log("OG salt: ", salt);
+    const keyEncryptionKey = await generateKeyEncryptionKey(passwordKey, salt);
+    console.log(masterKey);
+
+    let payload;
+
+    if (masterKey.k) {
+      /**
+       * Encrypt the master key using the keyEncryptionKey and
+       * an initialization vector/nonce of 12 random bytes
+       */
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encryptedMasterKey = await encryptMasterKey(
+        keyEncryptionKey,
+        masterKey.k,
+        iv
+      );
+
+      if (encryptedMasterKey) {
+        const encryptedMasterKey_b64 =
+          Buffer.from(encryptedMasterKey).toString("base64");
+        const salt_b64 = Buffer.from(salt).toString("base64");
+        const iv_b64 = Buffer.from(iv).toString("base64");
+
+        payload = {
+          encrypted_master_key_b64: encryptedMasterKey_b64,
+          // encryptedMessage,
+          salt_b64: salt_b64,
+          iv_b64: iv_b64,
+        };
+
+        console.log(payload);
+        const supabase = createClient();
+        const { data, error } = await supabase.from("users").upsert(payload);
+        console.log(data, error);
+        queryClient.invalidateQueries({ queryKey: ["userData"] });
+      }
+    }
+  };
   return (
     <>
+      <form onSubmit={keySubmit}>
+        <label htmlFor="pin">PIN</label>
+        <input type="text" name="pin" />
+        <button>Submit</button>
+      </form>
       <input type="file" name="avatar" onChange={handleFileChange} />
       <Button onClick={handleSubmit}>Upload</Button>
       <Image

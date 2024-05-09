@@ -1,6 +1,6 @@
 import { QueryData, SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from './client';
-import { Database } from '@/types/supabase';
+import { Database, Tables } from '@/types/supabase';
 const supabase = createClient()
 
 const transactionsQueryString = "*, categories(name)"
@@ -73,3 +73,9 @@ export const fetchCategories = async (client: SupabaseClient<Database>) => {
 	return await client.from("categories").select("*");
 };
 
+
+export async function uploadKeys(payload: Partial<Tables<"users">>) {
+	const supabase = await createClient();
+
+	return await supabase.from("users").insert([payload]);
+}

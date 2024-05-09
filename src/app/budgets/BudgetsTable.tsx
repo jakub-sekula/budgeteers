@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import slugify from "slugify";
 
@@ -19,6 +19,7 @@ import { useBudgetContext } from "./BudgetContext";
 import clsx from "clsx";
 import NewBudgetForm from "./NewBudgetForm";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function BudgetsTable() {
   const router = useRouter();
@@ -29,10 +30,18 @@ export default function BudgetsTable() {
   });
 
   const { selectedBudget } = useBudgetContext();
+  const queryClient = useQueryClient();
 
   const budgets = budgetsQuery.data?.data as BudgetsWithEntries | undefined;
 
-  console.log(budgets);
+  const deleteBudget = async (id: string) => {
+    const supabase = createClient();
+    const { error } = await supabase.from("budgets").delete().eq("id", id);
+    if (error) return console.log(error);
+    queryClient.invalidateQueries({
+      queryKey: ["budgets"],
+    });
+  };
 
   return (
     <>
@@ -45,6 +54,7 @@ export default function BudgetsTable() {
               <TableHead>Description</TableHead>
               <TableHead>Is default</TableHead>
               <TableHead>Entries</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,6 +82,17 @@ export default function BudgetsTable() {
                     </ul>
                   </TableCell>
                   <TableCell className="text-right"></TableCell>
+                  <TableCell className="text-right">
+
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteBudget(budget.id);
+                    }}
+                    >
+                    Delete
+                  </Button>
+                    </TableCell>
                 </TableRow>
               ))}
           </TableBody>

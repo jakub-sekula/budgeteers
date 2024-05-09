@@ -80,7 +80,7 @@ export default function NewBudgetForm() {
       user_id: user.id,
       description: formData.get("description") as string,
       name: formData.get("name") as string,
-      default: formData.get("isDefault") ? true : false,
+      default: Boolean(formData.get("isDefault")),
     };
 
     await mutate(budget);
@@ -115,7 +115,7 @@ export default function NewBudgetForm() {
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="isDefault">Default?</Label>
-                <Checkbox id="isDefault" />
+                <Checkbox id="isDefault" name="isDefault"/>
               </div>
             </div>
           </form>
