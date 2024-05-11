@@ -3,15 +3,6 @@ import { createClient } from "@/utils/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { FormEvent, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,13 +18,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useBudgetContext } from "./BudgetContext";
 import { fetchCategories } from "@/utils/supabase/api";
 
-export default function BudgetEntryCategoryForm() {
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
+
+export default function BudgetPeriodCategoryForm() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const supabase = createClient();
   const ref = useRef<HTMLFormElement>(null);
 
-  const { selectedBudget, selectedBudgetEntry } = useBudgetContext();
+  const { selectedBudget, selectedBudgetPeriod } = useBudgetContext();
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -45,7 +47,7 @@ export default function BudgetEntryCategoryForm() {
   const { mutate } = useMutation({
     mutationFn: async (
       budgetCategory: Omit<
-        Tables<"budget_categories">,
+        Tables<"budget_period_categories">,
         "created_at" | "id" | "icon"
       >
     ) => {
@@ -53,7 +55,7 @@ export default function BudgetEntryCategoryForm() {
       console.log(budgetCategory);
 
       const { data, error } = await supabase
-        .from("budget_categories")
+        .from("budget_period_categories")
         .insert([budgetCategory])
         .select()
         .single();
@@ -64,7 +66,7 @@ export default function BudgetEntryCategoryForm() {
 
       return data;
     },
-    onSuccess: async (data: Tables<"budget_categories">) => {
+    onSuccess: async (data: Tables<"budget_period_categories">) => {
       console.log(data);
       toast({ title: "Successfully created new budget" });
     },
@@ -78,7 +80,7 @@ export default function BudgetEntryCategoryForm() {
     },
     onSettled: async () =>
       await queryClient.invalidateQueries({
-        queryKey: ["budget_entries", selectedBudget?.id],
+        queryKey: ["budget_periods", selectedBudget?.id],
       }),
   });
 
@@ -93,10 +95,10 @@ export default function BudgetEntryCategoryForm() {
     if (!user) throw new Error("You must be logged in!");
 
     const budgetEntry: Omit<
-      Tables<"budget_categories">,
+      Tables<"budget_period_categories">,
       "created_at" | "id" | "icon" | "type" | "budget_id"
     > = {
-      budget_entry_id: selectedBudgetEntry.id,
+      budget_entry_id: selectedBudgetPeriod.id,
       user_id: user.id,
       category_id: formData.get("categoryId") as string,
       description: formData.get("description") as string,
@@ -107,17 +109,24 @@ export default function BudgetEntryCategoryForm() {
       amount: parseFloat(formData.get("amount") as string) * 100,
     };
 
-    mutate(budgetEntry as Tables<"budget_categories">);
+    mutate(budgetEntry as Tables<"budget_period_categories">);
   };
 
   return (
     <>
-      <Card className="col-span-4 shrink-0">
-        <CardHeader>
-          <CardTitle>Add category for {selectedBudgetEntry?.name}</CardTitle>
-          <CardDescription>For example May 2024</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Dialog className="col-span-4 shrink-0">
+        <DialogTrigger asChild>
+          <Button variant="outline" className="flex gap-2">
+            Add category <Plus size={16} />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Add category for {selectedBudgetPeriod?.name}
+            </DialogTitle>
+            <DialogDescription>For example May 2024</DialogDescription>
+          </DialogHeader>
           <form onSubmit={handleSubmit} id="budgetEntryCategoryForm" ref={ref}>
             <div className="grid w-full items-center gap-4">
               {/* <div className="flex flex-col space-y-1.5">
@@ -170,9 +179,9 @@ export default function BudgetEntryCategoryForm() {
                 </Select>
               </div>
             </div>
+            
           </form>
-        </CardContent>
-        <CardFooter className="flex justify-between">
+        <DialogFooter className="flex justify-between">
           <Button
             type="button"
             variant="outline"
@@ -185,8 +194,9 @@ export default function BudgetEntryCategoryForm() {
           <Button type="submit" form="budgetEntryCategoryForm">
             Add
           </Button>
-        </CardFooter>
-      </Card>
+        </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

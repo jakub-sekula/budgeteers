@@ -19,36 +19,32 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { BudgetEntryWithCategories } from "@/utils/supabase/api";
+import { BudgetPeriodWithCategories } from "@/utils/supabase/api";
 import { usePathname, useRouter } from "next/navigation";
 import slugify from "slugify";
 import { slugifyWithId } from "@/lib/utils";
+import { useGlobalContext } from "@/components/Providers";
 
-export default function BudgetEntryCard({
-  entry,
+export default function BudgetPeriodCard({
+  period,
 }: {
-  entry: BudgetEntryWithCategories;
+  period: BudgetPeriodWithCategories;
 }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const {
-    setSelectedBudgetEntry,
-    selectedBudgetEntry,
-    selectedEntryCategoryId,
-    setSelectedEntryCategoryId,
-	selectedBudget
-  } = useBudgetContext();
+
+  const { defaultBudget } = useGlobalContext();
 
   const deleteEntry = async (id: string) => {
     const supabase = createClient();
     const { error } = await supabase
-      .from("budget_entries")
+      .from("budget_periods")
       .delete()
       .eq("id", id);
     if (error) return console.log(error);
     queryClient.invalidateQueries({
-      queryKey: ["budget_entries", selectedBudget?.id],
+      queryKey: ["budget_periods", defaultBudget?.id],
     });
     queryClient.invalidateQueries({
       queryKey: ["budgets"],
@@ -58,36 +54,39 @@ export default function BudgetEntryCard({
   const deleteCategory = async (id: string) => {
     const supabase = createClient();
     const { error } = await supabase
-      .from("budget_categories")
+      .from("budget_period_categories")
       .delete()
       .eq("id", id);
     if (error) return console.log(error);
     queryClient.invalidateQueries({
-      queryKey: ["budget_entries", selectedBudget?.id],
+      queryKey: ["budget_periods", defaultBudget?.id],
     });
     queryClient.invalidateQueries({
       queryKey: ["budgets"],
     });
   };
 
-  if (!entry) return null;
+  if (!period) return null;
 
   return (
     <Card
-      key={entry.id}
+      key={period.id}
       onClick={() => {
-        setSelectedBudgetEntry(entry);
-        router.push(`${pathname}/${entry.id}`);
+        // setdefaultBudgetPeriod(period);
+        router.push(`/budgets/${defaultBudget.id}/${period.id}`);
       }}
-      className={clsx(selectedBudgetEntry?.id === entry.id ? "bg-sky-100" : null, 'col-span-8')}
+      className={clsx(
+        defaultBudget?.id === period.id ? "bg-sky-100" : null,
+        "col-span-8"
+      )}
     >
       <CardHeader>
         <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight lg:text-3xl">
-          {entry.name}
+          {period.name}
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              deleteEntry(entry.id);
+              deleteEntry(period.id);
             }}
           >
             Delete
@@ -96,7 +95,7 @@ export default function BudgetEntryCard({
         <CardDescription className="flex gap-4">
           <span>
             Starts on:{" "}
-            {new Date(entry.starts_on).toLocaleDateString("en-GB", {
+            {new Date(period.starts_on).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -104,7 +103,7 @@ export default function BudgetEntryCard({
           </span>
           <span>
             Ends on:{" "}
-            {new Date(entry.ends_on).toLocaleDateString("en-GB", {
+            {new Date(period.ends_on).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -124,23 +123,14 @@ export default function BudgetEntryCard({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {entry.budget_categories.map((category) => (
-            <TableRow
-              key={category.id}
-              onClick={(e) => {
-				e.stopPropagation()
-                setSelectedEntryCategoryId(category.id);
-              }}
-              className={clsx(
-                selectedEntryCategoryId === category.id ? "bg-orange-200" : null
-              )}
-            >
-              <TableCell>{category.name}</TableCell>
-              <TableCell>{category.description}</TableCell>
+          {period.budget_period_categories.map((category) => (
+            <TableRow key={category.id}>
+              <TableCell>{category?.categories?.name}</TableCell>
+              {/* <TableCell>{category.description}</TableCell> */}
               <TableCell>
                 <ul>
-                  {category?.transactions.map((transaction) => (
-                    <li key={entry.id}>
+                  {category?.transactions?.map((transaction) => (
+                    <li key={period.id}>
                       {transaction.description} - £{" "}
                       {(transaction.amount / 100).toFixed(2)}
                     </li>

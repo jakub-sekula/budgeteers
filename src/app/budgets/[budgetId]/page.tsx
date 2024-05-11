@@ -1,12 +1,11 @@
 "use client";
-import React, { useEffect } from "react";
-import BudgetEntriesTable from "../BudgetEntriesTable";
-import { useBudgetContext } from "../BudgetContext";
+import BudgetPeriodsTable from "../BudgetPeriodsTable";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { fetchBudget } from "@/utils/supabase/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGlobalContext } from "@/components/Providers";
+import BudgetPeriodForm from "../BudgetPeriodForm";
+import BudgetPeriodCategoryForm from "../BudgetPeriodCategoryForm";
 
 export default function Page({ params }: { params: { budgetId: string } }) {
   const supabase = createClient();
@@ -38,10 +37,14 @@ export default function Page({ params }: { params: { budgetId: string } }) {
   return (
     <>
       {/* <HydrationBoundary state={dehydrate(queryClient)}> */}
-      <h1 className="col-span-full scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-        {budget?.name || <Skeleton className="w-48 h-12" />}
-      </h1>
-      <BudgetEntriesTable budgetId={params.budgetId} />;
+      <div className="flex col-span-full gap-6 items-center">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+          {budget?.name || <Skeleton className="w-48 h-12" />}
+        </h1>
+        <BudgetPeriodForm budgetId={params.budgetId} />
+        <BudgetPeriodCategoryForm />
+      </div>
+      <BudgetPeriodsTable budgetId={params.budgetId} />
       {/* </HydrationBoundary> */}
     </>
   );

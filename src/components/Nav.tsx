@@ -81,6 +81,20 @@ export default function Nav() {
             <NavigationMenuItem>
               <Link
                 prefetch={true}
+                href={`/budgets/${defaultBudget.id}`}
+                legacyBehavior
+                passHref
+              >
+                <NavigationMenuLink
+                  className={clsx(navigationMenuTriggerStyle())}
+                >
+                  My budget
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link
+                prefetch={true}
                 href="/transactions"
                 legacyBehavior
                 passHref
@@ -110,15 +124,7 @@ export default function Nav() {
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link prefetch={true} href={`/budgets/${defaultBudget.id}`} legacyBehavior passHref>
-                <NavigationMenuLink
-                  className={clsx(navigationMenuTriggerStyle())}
-                >
-                  My budget
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
+
             <NavigationMenuItem>
               <Link prefetch={true} href="/private" legacyBehavior passHref>
                 <NavigationMenuLink
@@ -144,6 +150,7 @@ export default function Nav() {
                     {/* <div className="flex gap-2 items-center"> */}
                     {/* <div className="size-3 rounded-full bg-emerald-500" /> */}
                     {budget.name}
+                    {budget.shared ? " (shared)" : null}
                     {/* </div> */}
                   </SelectItem>
                 ))}

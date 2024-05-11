@@ -1,4 +1,4 @@
-import BudgetEntryForm from "./BudgetEntryForm";
+import BudgetPeriodForm from "./BudgetPeriodForm";
 import NewBudgetForm from "./NewBudgetForm";
 import BudgetProvider from "./BudgetContext";
 

@@ -144,9 +144,9 @@ export default function CategoryCard({
           </Card>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem>
-            <DialogTrigger>Edit</DialogTrigger>
-          </ContextMenuItem>
+          <DialogTrigger asChild>
+            <ContextMenuItem>Edit</ContextMenuItem>
+          </DialogTrigger>
           <ContextMenuItem onClick={() => deleteCategory(category.id)}>
             Delete
           </ContextMenuItem>

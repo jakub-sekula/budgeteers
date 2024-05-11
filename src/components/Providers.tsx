@@ -34,7 +34,7 @@ function GlobalProvider({ children }: { children: React.ReactNode }) {
 
       if (!user) return;
       const { data: userData, error: userError } = await supabase
-        .from("users") // Assuming 'auth.users' is your users table name
+        .from("users")
         .select("default_budget_id")
         .eq("id", user.id)
         .single();

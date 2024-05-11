@@ -2,12 +2,7 @@
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useState,
-} from "react";
+import { ReactNode, createContext, useContext, useState } from "react";
 
 const BudgetContext = createContext<{}>({});
 
@@ -16,11 +11,8 @@ export default function BudgetProvider({ children }: { children: ReactNode }) {
     string | null
   >(null);
 
-  const [selectedBudget, setSelectedBudget] =
-    useState<Tables<"budgets"> | null>(null);
-
-  const [selectedBudgetEntry, setSelectedBudgetEntry] =
-    useState<Tables<"budget_entries"> | null>(null);
+  const [activePeriod, setActivePeriod] =
+    useState<Tables<"budget_periods"> | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ["users"],
@@ -36,18 +28,14 @@ export default function BudgetProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const users = usersQuery?.data
+  const users = usersQuery?.data;
 
   return (
     <BudgetContext.Provider
       value={{
-        selectedEntryCategoryId,
-        setSelectedEntryCategoryId,
-        selectedBudget,
-        setSelectedBudget,
-        selectedBudgetEntry,
-        setSelectedBudgetEntry,
-        users
+        activePeriod,
+        setActivePeriod,
+        users,
       }}
     >
       {children}

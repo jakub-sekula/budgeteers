@@ -74,7 +74,7 @@ export default function BudgetsTable() {
                   <TableCell>{budget.description}</TableCell>
                   <TableCell>
                     <ul>
-                      {budget.budget_entries.map((entry) => (
+                      {budget.budget_periods.map((entry) => (
                         <li key={entry.id}>
                           {entry.name} - {entry.description}
                         </li>

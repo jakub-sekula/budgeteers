@@ -18,7 +18,7 @@ export const fetchTransactions = async (client: SupabaseClient<Database>) => {
   return transactions;
 };
 
-const budgetsQueryString = "*, category_types (*), budget_entries (name, description, id)";
+const budgetsQueryString = "*, category_types (*), budget_periods (name, description, id)";
 let budgetsQuery = supabase.from("budgets").select(budgetsQueryString).single();
 export type BudgetWithEntries = QueryData<typeof budgetsQuery>;
 export type BudgetsWithEntries = BudgetWithEntries[];
@@ -44,33 +44,33 @@ export const fetchBudget = async (
   return budget;
 };
 
-const budgetEntriesQueryString =
-  "*, budget_categories (*, transactions (type,amount,description,id))";
-let budgetEntriesQuery = supabase.from("budget_entries").select(
-  budgetEntriesQueryString,
+const budgetPeriodsQueryString =
+  "*, budget_period_categories (*, categories(*), transactions(*))";
+let budgetPeriodsQuery = supabase.from("budget_periods").select(
+  budgetPeriodsQueryString,
 ).single();
-export type BudgetEntryWithCategories = QueryData<typeof budgetEntriesQuery>;
-export type BudgetEntriesWithCategories = BudgetEntryWithCategories[];
+export type BudgetPeriodWithCategories = QueryData<typeof budgetPeriodsQuery>;
+export type BudgetPeriodsWithCategories = BudgetPeriodWithCategories[];
 
-export const fetchBudgetEntries = async (
+export const fetchBudgetPeriods = async (
   client: SupabaseClient<Database>,
   budgetId: string,
 ) => {
   let budgets = await client
-    .from("budget_entries")
-    .select(budgetEntriesQueryString)
+    .from("budget_periods")
+    .select(budgetPeriodsQueryString)
     .eq("budget_id", budgetId);
 
   return budgets;
 };
 
-export const fetchBudgetEntry = async (
+export const fetchBudgetPeriod = async (
   client: SupabaseClient<Database>,
   entryId: string,
 ) => {
   let budgets = await client
-    .from("budget_entries")
-    .select(budgetEntriesQueryString)
+    .from("budget_periods")
+    .select(budgetPeriodsQueryString)
     .eq("id", entryId)
     .single();
 

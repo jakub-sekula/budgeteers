@@ -1,35 +1,32 @@
 "use client";
 import React, { useEffect } from "react";
-import BudgetEntryCard from "../../BudgetEntryCard";
+import BudgetPeriodCard from "../../BudgetPeriodCard";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
-import { useBudgetContext } from "../../BudgetContext";
 import {
-  BudgetEntriesWithCategories,
-  BudgetEntryWithCategories,
+  BudgetPeriodsWithCategories,
+  BudgetPeriodWithCategories,
   fetchBudget,
-  fetchBudgetEntries,
+  fetchBudgetPeriods,
 } from "@/utils/supabase/api";
-import BudgetEntryCategoryForm from "../../BudgetEntryCategoryForm";
 
 export default function Page({
   params,
 }: {
-  params: { budgetId: string; entryId: string };
+  params: { budgetId: string; periodId: string };
 }) {
   const supabase = createClient();
-  const { setSelectedBudget, setSelectedBudgetEntry } = useBudgetContext();
 
-  const budgetEntriesQuery = useQuery({
-    queryKey: ["budget_entries", params.budgetId],
-    queryFn: async () => fetchBudgetEntries(supabase, params.budgetId),
+  const budgetPeriodsQuery = useQuery({
+    queryKey: ["budget_periods", params.budgetId],
+    queryFn: async () => fetchBudgetPeriods(supabase, params.budgetId),
   });
 
-  const budgetEntries = budgetEntriesQuery.data?.data as
-    | BudgetEntriesWithCategories
+  const budgetPeriods = budgetPeriodsQuery.data?.data as
+    | BudgetPeriodsWithCategories
     | undefined;
 
-  const entry = budgetEntries?.find?.((entry) => entry.id === params.entryId);
+  const period = budgetPeriods?.find?.((period) => period.id === params.periodId);
 
   const budgetQuery = useQuery({
     queryKey: ["budgets", params.budgetId],
@@ -38,30 +35,12 @@ export default function Page({
 
   const budget = budgetQuery.data?.data;
 
-  useEffect(() => {
-    if (!budget) return;
-    setSelectedBudget(budget);
-    return () => {
-      setSelectedBudget(null);
-    };
-  }, [budget]);
-
-  useEffect(() => {
-    if (!entry) return;
-    setSelectedBudgetEntry(entry);
-    return () => {
-      setSelectedBudgetEntry(null);
-    };
-  }, [entry]);
-
   return (
     <>
       <h1 className="col-span-full scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-        {entry?.name}
+        {period?.name}
       </h1>
-      <BudgetEntryCategoryForm />
-
-      <BudgetEntryCard entry={entry as BudgetEntryWithCategories} />
+      <BudgetPeriodCard period={period as BudgetPeriodWithCategories} />
     </>
   );
 }

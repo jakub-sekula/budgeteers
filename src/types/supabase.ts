@@ -75,63 +75,38 @@ export type Database = {
           },
         ]
       }
-      budget_categories: {
+      budget_period_categories: {
         Row: {
           amount: number
-          budget_entry_id: string | null
-          budget_id: string | null
+          budget_period_id: string | null
           category_id: string | null
-          created_at: string
-          description: string | null
-          hidden: boolean
-          icon: string | null
           id: string
-          name: string | null
           type: Database["public"]["Enums"]["transaction_types"] | null
         }
         Insert: {
           amount?: number
-          budget_entry_id?: string | null
-          budget_id?: string | null
+          budget_period_id?: string | null
           category_id?: string | null
-          created_at?: string
-          description?: string | null
-          hidden?: boolean
-          icon?: string | null
           id?: string
-          name?: string | null
           type?: Database["public"]["Enums"]["transaction_types"] | null
         }
         Update: {
           amount?: number
-          budget_entry_id?: string | null
-          budget_id?: string | null
+          budget_period_id?: string | null
           category_id?: string | null
-          created_at?: string
-          description?: string | null
-          hidden?: boolean
-          icon?: string | null
           id?: string
-          name?: string | null
           type?: Database["public"]["Enums"]["transaction_types"] | null
         }
         Relationships: [
           {
-            foreignKeyName: "budget_categories_budget_entry_id_fkey"
-            columns: ["budget_entry_id"]
+            foreignKeyName: "budget_period_categories_budget_entry_id_fkey"
+            columns: ["budget_period_id"]
             isOneToOne: false
-            referencedRelation: "budget_entries"
+            referencedRelation: "budget_periods"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "budget_categories_budget_id_fkey"
-            columns: ["budget_id"]
-            isOneToOne: false
-            referencedRelation: "budgets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "budget_categories_category_id_fkey"
+            foreignKeyName: "budget_period_categories_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
@@ -139,10 +114,9 @@ export type Database = {
           },
         ]
       }
-      budget_entries: {
+      budget_periods: {
         Row: {
           budget_id: string
-          created_at: string
           description: string | null
           ends_on: string
           id: string
@@ -151,7 +125,6 @@ export type Database = {
         }
         Insert: {
           budget_id: string
-          created_at?: string
           description?: string | null
           ends_on: string
           id?: string
@@ -160,7 +133,6 @@ export type Database = {
         }
         Update: {
           budget_id?: string
-          created_at?: string
           description?: string | null
           ends_on?: string
           id?: string
@@ -181,29 +153,38 @@ export type Database = {
         Row: {
           color: string | null
           created_at: string
-          created_by: string | null
+          created_by: string
+          default_payday: number | null
           description: string | null
+          frequency: string | null
           icon: string | null
           id: string
           name: string
+          shared: boolean | null
         }
         Insert: {
           color?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
+          default_payday?: number | null
           description?: string | null
+          frequency?: string | null
           icon?: string | null
           id?: string
           name: string
+          shared?: boolean | null
         }
         Update: {
           color?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
+          default_payday?: number | null
           description?: string | null
+          frequency?: string | null
           icon?: string | null
           id?: string
           name?: string
+          shared?: boolean | null
         }
         Relationships: [
           {
@@ -418,7 +399,7 @@ export type Database = {
             foreignKeyName: "transactions_budget_category_id_fkey"
             columns: ["budget_category_id"]
             isOneToOne: false
-            referencedRelation: "budget_categories"
+            referencedRelation: "budget_period_categories"
             referencedColumns: ["id"]
           },
           {
