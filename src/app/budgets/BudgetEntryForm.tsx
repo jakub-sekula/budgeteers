@@ -85,7 +85,7 @@ export default function BudgetEntryForm() {
 
     const budgetEntry: Omit<Tables<"budget_entries">, "created_at" | "id"> = {
       budget_id: selectedBudget?.id,
-      user_id: user.id,
+      // user_id: user.id,
       description: formData.get("description") as string,
       name: formData.get("name") as string,
       starts_on: formData.get("starts_on") as string,

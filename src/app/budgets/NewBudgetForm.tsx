@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Tables } from "@/types/supabase";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useBudgetContext } from "./BudgetContext";
 
 export default function NewBudgetForm() {
   const queryClient = useQueryClient();
@@ -30,12 +31,17 @@ export default function NewBudgetForm() {
   const supabase = createClient();
   const ref = useRef<HTMLFormElement>(null);
 
+  const { users } = useBudgetContext();
+
   const { mutate } = useMutation({
-    mutationFn: async (
-      budget: Omit<Tables<"budgets">, "created_at" | "color" | "icon" | "id">
-    ) => {
+    mutationFn: async ({
+      budget,
+      extraUser,
+    }: {
+      budget: Omit<Tables<"budgets">, "created_at" | "color" | "icon" | "id">;
+      extraUser: string;
+    }) => {
       const supabase = createClient();
-      console.log(budget);
 
       const { data, error } = await supabase
         .from("budgets")
@@ -44,10 +50,18 @@ export default function NewBudgetForm() {
         .single();
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error?.message);
       }
 
-      return data;
+      console.log("giwno: ", extraUser);
+
+      if (!extraUser) return data;
+
+      const { data: kek, error: kok } = await supabase
+        .from("budgets_users")
+        .insert({ budget_id: data.id, user_id: extraUser });
+
+      console.log(kek);
     },
     onSuccess: async (data: Tables<"budgets">) => {
       console.log(data);
@@ -55,9 +69,10 @@ export default function NewBudgetForm() {
       await queryClient.invalidateQueries({
         queryKey: ["budgets"],
       });
+      return data;
     },
     onError: (error) => {
-      console.log(error);
+      console.log("kurwa", error);
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
@@ -77,13 +92,17 @@ export default function NewBudgetForm() {
     if (!user) throw new Error("You must be logged in!");
 
     const budget = {
-      user_id: user.id,
       description: formData.get("description") as string,
       name: formData.get("name") as string,
-      default: Boolean(formData.get("isDefault")),
+      // default: Boolean(formData.get("isDefault")),
+      created_by: user.id,
     };
 
-    await mutate(budget);
+    const extraUser = formData.get("user") as string;
+
+    console.log(formData.get("user"));
+
+    const data = await mutate({budget, extraUser});
   };
 
   return (
@@ -115,8 +134,23 @@ export default function NewBudgetForm() {
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="isDefault">Default?</Label>
-                <Checkbox id="isDefault" name="isDefault"/>
+                <Checkbox id="isDefault" name="isDefault" />
               </div>
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="user">Add user</Label>
+              <Select name="user">
+                <SelectTrigger id="user">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {users?.map((user: any) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user?.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </form>
         </CardContent>

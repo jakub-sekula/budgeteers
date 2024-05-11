@@ -20,6 +20,7 @@ import clsx from "clsx";
 import NewBudgetForm from "./NewBudgetForm";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useGlobalContext } from "@/components/Providers";
 
 export default function BudgetsTable() {
   const router = useRouter();
@@ -29,8 +30,9 @@ export default function BudgetsTable() {
     queryFn: async () => fetchBudgets(supabase),
   });
 
-  const { selectedBudget } = useBudgetContext();
   const queryClient = useQueryClient();
+
+  const {defaultBudget} = useGlobalContext()
 
   const budgets = budgetsQuery.data?.data as BudgetsWithEntries | undefined;
 
@@ -52,7 +54,6 @@ export default function BudgetsTable() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>Is default</TableHead>
               <TableHead>Entries</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -66,12 +67,11 @@ export default function BudgetsTable() {
                     router.push(`/budgets/${budget.id}`);
                   }}
                   className={clsx(
-                    selectedBudget?.id === budget.id ? "bg-emerald-200" : null
+                    defaultBudget?.id === budget.id ? "bg-emerald-200" : null
                   )}
                 >
                   <TableCell>{budget.name}</TableCell>
                   <TableCell>{budget.description}</TableCell>
-                  <TableCell>{String(budget.default)}</TableCell>
                   <TableCell>
                     <ul>
                       {budget.budget_entries.map((entry) => (

@@ -42,8 +42,6 @@ export default function BudgetEntryCategoryForm() {
 
   const { data: categories } = categoriesQuery?.data ?? {};
 
-  
-
   const { mutate } = useMutation({
     mutationFn: async (
       budgetCategory: Omit<
@@ -96,18 +94,20 @@ export default function BudgetEntryCategoryForm() {
 
     const budgetEntry: Omit<
       Tables<"budget_categories">,
-      "created_at" | "id" | "icon"
+      "created_at" | "id" | "icon" | "type" | "budget_id"
     > = {
       budget_entry_id: selectedBudgetEntry.id,
       user_id: user.id,
       category_id: formData.get("categoryId") as string,
       description: formData.get("description") as string,
-      name: categories?.find(category => category.id === formData.get("categoryId"))?.name as string,
+      name: categories?.find(
+        (category) => category.id === formData.get("categoryId")
+      )?.name as string,
       hidden: formData.get("hidden") ? true : false,
       amount: parseFloat(formData.get("amount") as string) * 100,
     };
 
-    await mutate(budgetEntry);
+    mutate(budgetEntry as Tables<"budget_categories">);
   };
 
   return (

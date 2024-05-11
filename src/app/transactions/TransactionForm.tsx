@@ -24,12 +24,15 @@ import {
 } from "@/components/ui/select";
 import { fetchAccounts, fetchCategories } from "@/utils/supabase/api";
 import { Tables } from "@/types/supabase";
+import { useGlobalContext } from "@/components/Providers";
 
 export default function TransactionForm() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const supabase = createClient();
   const ref = useRef<HTMLFormElement>(null);
+  const { defaultBudget } = useGlobalContext();
+
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -60,7 +63,8 @@ export default function TransactionForm() {
         to_account: (formData.get("toAccount") as string) || undefined,
         type: formData.get("type") as string,
         description: formData.get("description") as string,
-        amount: parseFloat(formData.get("amount") as string) * 100,
+        amount: Math.trunc(parseFloat(formData.get("amount") as string) * 100),
+        budget_id: defaultBudget.id
       };
 
       const { data, error } = await supabase

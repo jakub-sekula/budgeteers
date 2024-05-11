@@ -16,15 +16,67 @@ import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { useGlobalContext } from "./Providers";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "./ui/use-toast";
 
 export default function Nav() {
   const supabase = createClient();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { budgets, defaultBudget } = useGlobalContext();
+
+  const { mutate } = useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) throw new Error("No user found!");
+
+      const { data, error } = await supabase
+        .from("users")
+        .update({ default_budget_id: id })
+        .eq("id", user.id)
+        .select();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
+    },
+    onSuccess: async (data) => {
+      toast({ title: "Successfully changed default budget" });
+      await queryClient.invalidateQueries({
+        queryKey: ["defaultBudget"],
+      });
+      return data;
+    },
+    onError: (error) => {
+      console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.message,
+      });
+    },
+  });
 
   return (
     <header className="w-full p-4 flex justify-center bg-white">
       <div className="max-w-6xl w-full">
-        <NavigationMenu className="w-full justify-between max-w-full">
+        <NavigationMenu className="w-full justify-between max-w-full gap-4">
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link
@@ -59,11 +111,11 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link prefetch={true} href="/budgets" legacyBehavior passHref>
+              <Link prefetch={true} href={`/budgets/${defaultBudget.id}`} legacyBehavior passHref>
                 <NavigationMenuLink
                   className={clsx(navigationMenuTriggerStyle())}
                 >
-                  Budgets
+                  My budget
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
@@ -77,6 +129,27 @@ export default function Nav() {
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
+          <div className="flex flex-col space-y-1.5 ml-auto w-48">
+            <Select
+              name="user"
+              onValueChange={(value) => mutate(value)}
+              value={defaultBudget.id}
+            >
+              <SelectTrigger id="user">
+                <SelectValue placeholder="Select budget" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                {budgets.map((budget) => (
+                  <SelectItem key={budget.id} value={budget.id}>
+                    {/* <div className="flex gap-2 items-center"> */}
+                    {/* <div className="size-3 rounded-full bg-emerald-500" /> */}
+                    {budget.name}
+                    {/* </div> */}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             onClick={async () => {
               await supabase.auth.signOut();

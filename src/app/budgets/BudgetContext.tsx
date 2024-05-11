@@ -1,22 +1,15 @@
 "use client";
 import { Tables } from "@/types/supabase";
-import {
-  BudgetsWithEntries,
-  fetchBudgetEntries,
-  fetchBudgets,
-} from "@/utils/supabase/api";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { usePathname } from "next/navigation";
 import {
   ReactNode,
   createContext,
   useContext,
-  useEffect,
   useState,
 } from "react";
 
-const BudgetContext = createContext<any>({});
+const BudgetContext = createContext<{}>({});
 
 export default function BudgetProvider({ children }: { children: ReactNode }) {
   const [selectedEntryCategoryId, setSelectedEntryCategoryId] = useState<
@@ -29,6 +22,22 @@ export default function BudgetProvider({ children }: { children: ReactNode }) {
   const [selectedBudgetEntry, setSelectedBudgetEntry] =
     useState<Tables<"budget_entries"> | null>(null);
 
+  const usersQuery = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase.from("users").select();
+
+      if (error) {
+        throw new Error(error?.message);
+      }
+
+      return data;
+    },
+  });
+
+  const users = usersQuery?.data
+
   return (
     <BudgetContext.Provider
       value={{
@@ -38,6 +47,7 @@ export default function BudgetProvider({ children }: { children: ReactNode }) {
         setSelectedBudget,
         selectedBudgetEntry,
         setSelectedBudgetEntry,
+        users
       }}
     >
       {children}

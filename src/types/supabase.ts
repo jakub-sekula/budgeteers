@@ -15,31 +15,23 @@ export type Database = {
           id: string
           name: string
           type: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           type: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           type?: string
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "Accounts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       attachments: {
         Row: {
@@ -88,7 +80,7 @@ export type Database = {
           amount: number
           budget_entry_id: string | null
           budget_id: string | null
-          category_id: string
+          category_id: string | null
           created_at: string
           description: string | null
           hidden: boolean
@@ -96,13 +88,12 @@ export type Database = {
           id: string
           name: string | null
           type: Database["public"]["Enums"]["transaction_types"] | null
-          user_id: string
         }
         Insert: {
           amount?: number
           budget_entry_id?: string | null
           budget_id?: string | null
-          category_id: string
+          category_id?: string | null
           created_at?: string
           description?: string | null
           hidden?: boolean
@@ -110,13 +101,12 @@ export type Database = {
           id?: string
           name?: string | null
           type?: Database["public"]["Enums"]["transaction_types"] | null
-          user_id: string
         }
         Update: {
           amount?: number
           budget_entry_id?: string | null
           budget_id?: string | null
-          category_id?: string
+          category_id?: string | null
           created_at?: string
           description?: string | null
           hidden?: boolean
@@ -124,7 +114,6 @@ export type Database = {
           id?: string
           name?: string | null
           type?: Database["public"]["Enums"]["transaction_types"] | null
-          user_id?: string
         }
         Relationships: [
           {
@@ -148,13 +137,6 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "budget_categories_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       budget_entries: {
@@ -166,7 +148,6 @@ export type Database = {
           id: string
           name: string
           starts_on: string
-          user_id: string
         }
         Insert: {
           budget_id: string
@@ -176,7 +157,6 @@ export type Database = {
           id?: string
           name: string
           starts_on?: string
-          user_id: string
         }
         Update: {
           budget_id?: string
@@ -186,7 +166,6 @@ export type Database = {
           id?: string
           name?: string
           starts_on?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -196,49 +175,99 @@ export type Database = {
             referencedRelation: "budgets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "budget_entries_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       budgets: {
         Row: {
           color: string | null
           created_at: string
-          default: boolean
+          created_by: string | null
           description: string | null
           icon: string | null
           id: string
           name: string
-          user_id: string
         }
         Insert: {
           color?: string | null
           created_at?: string
-          default?: boolean
+          created_by?: string | null
           description?: string | null
           icon?: string | null
           id?: string
           name: string
-          user_id: string
         }
         Update: {
           color?: string | null
           created_at?: string
-          default?: boolean
+          created_by?: string | null
           description?: string | null
           icon?: string | null
           id?: string
           name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets_category_types: {
+        Row: {
+          budget_id: string
+          category_type_id: string
+        }
+        Insert: {
+          budget_id: string
+          category_type_id: string
+        }
+        Update: {
+          budget_id?: string
+          category_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_category_types_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_category_types_category_type_id_fkey"
+            columns: ["category_type_id"]
+            isOneToOne: false
+            referencedRelation: "category_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets_users: {
+        Row: {
+          budget_id: string
+          user_id: string
+        }
+        Insert: {
+          budget_id: string
+          user_id: string
+        }
+        Update: {
+          budget_id?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "budgets_user_id_fkey"
+            foreignKeyName: "budgets_users_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_users_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -248,8 +277,8 @@ export type Database = {
       }
       categories: {
         Row: {
-          color: string | null
-          created_at: string
+          category_type_id: string | null
+          color: string
           default: boolean | null
           hidden: boolean
           icon: string | null
@@ -261,8 +290,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          color?: string | null
-          created_at?: string
+          category_type_id?: string | null
+          color?: string
           default?: boolean | null
           hidden?: boolean
           icon?: string | null
@@ -274,8 +303,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
-          color?: string | null
-          created_at?: string
+          category_type_id?: string | null
+          color?: string
           default?: boolean | null
           hidden?: boolean
           icon?: string | null
@@ -288,7 +317,49 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "categories_category_type_id_fkey"
+            columns: ["category_type_id"]
+            isOneToOne: false
+            referencedRelation: "category_types"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "Categories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      category_types: {
+        Row: {
+          color: string
+          hidden: boolean
+          icon: string | null
+          id: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          color?: string
+          hidden?: boolean
+          icon?: string | null
+          id?: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          color?: string
+          hidden?: boolean
+          icon?: string | null
+          id?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_types_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -398,6 +469,7 @@ export type Database = {
           iv_b64: string | null
           last_name: string | null
           salt_b64: string | null
+          username: string | null
         }
         Insert: {
           avatar?: string | null
@@ -409,6 +481,7 @@ export type Database = {
           iv_b64?: string | null
           last_name?: string | null
           salt_b64?: string | null
+          username?: string | null
         }
         Update: {
           avatar?: string | null
@@ -420,6 +493,7 @@ export type Database = {
           iv_b64?: string | null
           last_name?: string | null
           salt_b64?: string | null
+          username?: string | null
         }
         Relationships: [
           {
@@ -443,7 +517,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_budgets_for_user: {
+        Args: {
+          user_id: string
+        }
+        Returns: string[]
+      }
+      get_transaction_summary_by_category: {
+        Args: {
+          input_budget_id: string
+        }
+        Returns: {
+          category_name: string
+          category_id: string
+          income: number
+          expense: number
+          transfer: number
+        }[]
+      }
     }
     Enums: {
       transaction_types: "expense" | "income" | "transfer"

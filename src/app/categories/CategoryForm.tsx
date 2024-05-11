@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { splitExt } from "@/lib/utils";
-import { Tables } from "@/types/supabase";
+import { Database, Tables } from "@/types/supabase";
 
 export default function CategoryForm() {
   const queryClient = useQueryClient();
@@ -51,7 +51,7 @@ export default function CategoryForm() {
       .insert([
         {
           name: categoryName,
-          transaction_type: type,
+          transaction_type: type as Database["public"]["Enums"]["transaction_types"],
           color: color,
           user_id: user.id,
         },
@@ -158,22 +158,13 @@ export default function CategoryForm() {
                 />
               </div>
               <div className="flex flex-col space-y-1.5 overflow-hidden">
-                <Label htmlFor="color">Icon</Label>
+                <Label htmlFor="icon">Icon</Label>
                 <input type="file" id="icon" name="icon" />
               </div>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              toast({ title: "gowno" });
-            }}
-          >
-            Cancel
-          </Button>
           <Button type="submit" form="categoryForm">
             Add
           </Button>

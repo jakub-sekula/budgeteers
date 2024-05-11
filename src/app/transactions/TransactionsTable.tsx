@@ -17,14 +17,21 @@ import {
 } from "@/utils/supabase/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useGlobalContext } from "@/components/Providers";
 
-export default function TransactionsTable({ queryString }: { queryString: string }) {
+export default function TransactionsTable({
+  queryString,
+}: {
+  queryString: string;
+}) {
   const supabase = createClient();
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["transactions"],
     queryFn: async () => await fetchTransactions(supabase),
   });
+
+  const { budgets } = useGlobalContext();
 
   const transactions = query.data?.data as
     | TransactionsWithCategories
@@ -52,6 +59,7 @@ export default function TransactionsTable({ queryString }: { queryString: string
             <TableHead>Category</TableHead>
             <TableHead>Currency</TableHead>
             <TableHead className="text-right">Amount</TableHead>
+            <TableHead className="text-right">Budget</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -74,6 +82,13 @@ export default function TransactionsTable({ queryString }: { queryString: string
                 <TableCell>{transaction.currency}</TableCell>
                 <TableCell className="text-right">
                   £ {(transaction.amount / 100).toFixed(2)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {
+                    budgets?.find(
+                      (budget) => budget.id === transaction.budget_id
+                    )?.name
+                  }
                 </TableCell>
                 <TableCell className="text-right">
                   <Button

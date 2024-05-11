@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { fetchBudget } from "@/utils/supabase/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGlobalContext } from "@/components/Providers";
 
 export default function Page({ params }: { params: { budgetId: string } }) {
   const supabase = createClient();
@@ -14,16 +15,25 @@ export default function Page({ params }: { params: { budgetId: string } }) {
     queryFn: async () => fetchBudget(supabase, params.budgetId),
   });
 
-  const { setSelectedBudget } = useBudgetContext();
   const budget = budgetsQuery.data?.data;
 
-  useEffect(() => {
-    if (!budget) return;
-    setSelectedBudget(budget);
-    return () => {
-      setSelectedBudget(null);
-    };
-  }, [budget]);
+  const summaryQuery = useQuery({
+    queryKey: ["budget_summary", params.budgetId],
+    queryFn: async () => {
+      let { data, error } = await supabase.rpc(
+        "get_transaction_summary_by_category",
+        {
+          input_budget_id: params.budgetId,
+        }
+      );
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+  });
+
+  console.log(summaryQuery?.data);
 
   return (
     <>

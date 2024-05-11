@@ -8,13 +8,10 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Categories from "./Categories";
 import CategoryForm from "./CategoryForm";
+import { fetchCategoryTypes } from "@/utils/supabase/api";
+import CategoryTypeForm from "./CategoryTypeForm";
 
 export const dynamic = "force-dynamic";
-
-const fetchCategories = async () => {
-  const supabase = createClient();
-  return await supabase.from("categories").select("*");
-};
 
 export default async function page() {
   const supabase = createClient();
@@ -25,17 +22,20 @@ export default async function page() {
   }
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
+    queryKey: ["category_types"],
+    queryFn: async () => await fetchCategoryTypes(supabase),
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
         Categories
       </h1>
-      <div className="flex gap-6 w-full">
+      <div className="grid gap-6 w-full">
         <Categories />
-        <CategoryForm />
+        <div className="flex gap-6">
+          <CategoryForm />
+          <CategoryTypeForm />
+        </div>
       </div>
     </HydrationBoundary>
   );
