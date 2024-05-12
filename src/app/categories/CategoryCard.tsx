@@ -26,13 +26,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { toast } from "@/components/ui/use-toast";
 import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Ban, Lock } from "lucide-react";
 import { useGlobalContext } from "@/components/Providers";
+import {
+  CategoriesWithChildren,
+  CategoryWithChildren,
+} from "@/utils/supabase/api";
 
 const iconColors = {
   red: { bg: "border-red-200 bg-red-100", icon: "text-red-600" },
@@ -73,11 +76,12 @@ export default function CategoryCard({
   category,
   className,
 }: {
-  category: Tables<"categories"> | Tables<"category_types">;
+  category: CategoryWithChildren;
   className?: string;
 }) {
   const queryClient = useQueryClient();
   const { defaultBudget } = useGlobalContext();
+  console.log(category);
 
   const deleteCategory = async (id: string) => {
     const supabase = createClient();
@@ -138,6 +142,13 @@ export default function CategoryCard({
                 </CardTitle>
                 <CardDescription className="capitalize leading-none">
                   {/* {category.transaction_type} */}
+                  {category.category_types ? (
+                    <ul>
+                      {category.category_types.map((child) => (
+                        <li key={child.id}>{child.name}</li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </CardDescription>
               </div>
             </CardHeader>

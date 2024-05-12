@@ -65,7 +65,6 @@ export default function BudgetPeriodCard({
     });
   };
 
-
   if (!period) return null;
 
   console.log(period);
@@ -118,6 +117,7 @@ export default function BudgetPeriodCard({
           <TableRow>
             <TableHead>Category</TableHead>
             <TableHead>Children</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -142,6 +142,7 @@ export default function BudgetPeriodCard({
                   </ul>
                 </TableCell>
                 <TableCell>£ {(category.amount / 100).toFixed(2)}</TableCell>
+                <TableCell>{category.type}</TableCell>
                 <TableCell>
                   <Button
                     onClick={() => {

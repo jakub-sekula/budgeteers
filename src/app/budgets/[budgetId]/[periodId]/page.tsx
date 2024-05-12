@@ -9,6 +9,7 @@ import {
   fetchBudgetPeriods,
 } from "@/utils/supabase/api";
 import TransactionsTable from "./TransactionsTable";
+import TransactionForm from "@/app/transactions/TransactionForm";
 
 export default function Page({
   params,
@@ -57,7 +58,10 @@ export default function Page({
         {period?.name}
       </h1>
       <BudgetPeriodCard period={period as BudgetPeriodWithCategories} />
-      <TransactionsTable periodId={params.periodId} />
+      <div className="flex col-span-full">
+        <TransactionForm budgetPeriodId={params.periodId} />
+        <TransactionsTable periodId={params.periodId} />
+      </div>
     </>
   );
 }

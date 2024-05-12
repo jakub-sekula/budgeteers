@@ -323,6 +323,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          parent_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -331,6 +332,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          parent_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -339,9 +341,17 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          parent_id?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "category_types_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "category_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "category_types_user_id_fkey"
             columns: ["user_id"]
@@ -358,6 +368,7 @@ export type Database = {
           budget_id: string | null
           budget_period_id: string | null
           category_id: string | null
+          category_type_id: string | null
           created_at: string
           currency: string
           description: string | null
@@ -374,6 +385,7 @@ export type Database = {
           budget_id?: string | null
           budget_period_id?: string | null
           category_id?: string | null
+          category_type_id?: string | null
           created_at?: string
           currency?: string
           description?: string | null
@@ -390,6 +402,7 @@ export type Database = {
           budget_id?: string | null
           budget_period_id?: string | null
           category_id?: string | null
+          category_type_id?: string | null
           created_at?: string
           currency?: string
           description?: string | null
@@ -427,6 +440,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_type_id_fkey"
+            columns: ["category_type_id"]
+            isOneToOne: false
+            referencedRelation: "category_types"
             referencedColumns: ["id"]
           },
           {

@@ -4,13 +4,13 @@ import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode, createContext, useContext, useState } from "react";
 
-const BudgetContext = createContext<{}>({});
+const BudgetContext = createContext<{
+  users?: any;
+  activePeriod?: any;
+  setActivePeriod?: any;
+}>({});
 
 export default function BudgetProvider({ children }: { children: ReactNode }) {
-  const [selectedEntryCategoryId, setSelectedEntryCategoryId] = useState<
-    string | null
-  >(null);
-
   const [activePeriod, setActivePeriod] =
     useState<Tables<"budget_periods"> | null>(null);
 

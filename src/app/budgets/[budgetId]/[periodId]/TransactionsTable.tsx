@@ -27,7 +27,7 @@ export default function TransactionsTable({ periodId }: { periodId: string }) {
     queryFn: async () => {
       return await supabase
         .from("transactions")
-        .select("*, categories(*)")
+        .select("*, categories(*), category_types(*)")
         .eq("budget_period_id", periodId);
     },
   });
@@ -79,7 +79,7 @@ export default function TransactionsTable({ periodId }: { periodId: string }) {
                   )}
                 </TableCell>
                 <TableCell>{transaction.description}</TableCell>
-                <TableCell>{transaction.categories?.name}</TableCell>
+                <TableCell>{transaction.categories?.name || transaction.category_types?.name}</TableCell>
                 <TableCell>{transaction.currency}</TableCell>
                 <TableCell className="text-right">
                   £ {(transaction.amount / 100).toFixed(2)}

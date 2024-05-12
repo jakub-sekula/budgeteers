@@ -3,7 +3,7 @@ import { createClient } from "./client";
 import { Database, Tables } from "@/types/supabase";
 const supabase = createClient();
 
-const transactionsQueryString = "*, categories(name)";
+const transactionsQueryString = "*, categories(name), category_types(name)";
 let transactionsQuery = supabase.from("transactions").select(
   transactionsQueryString,
 );
@@ -12,14 +12,13 @@ export type TransactionsWithCategories = QueryData<typeof transactionsQuery>;
 export const fetchTransactions = async (client: SupabaseClient<Database>) => {
   let transactions = await client
     .from("transactions")
-    .select(transactionsQueryString)
-    .is("budget_category_id", null);
+    .select(transactionsQueryString);
 
   return transactions;
 };
 
 const budgetsQueryString =
-  "*, category_types (*), budget_periods (name, description, id, is_current)";
+  "*, category_types (*, category_types(*)), budget_periods (name, description, id, is_current)";
 let budgetsQuery = supabase.from("budgets").select(budgetsQueryString).single();
 export type BudgetWithEntries = QueryData<typeof budgetsQuery>;
 export type BudgetsWithEntries = BudgetWithEntries[];
@@ -83,19 +82,41 @@ export const fetchAccounts = async (client: SupabaseClient<Database>) => {
 };
 
 export const fetchCategories = async (client: SupabaseClient<Database>) => {
-  return await client.from("categories").select("*");
+  return await client.from("category_types").select("*");
 };
 
 export const fetchCategoryTypes = async (client: SupabaseClient<Database>) => {
   return await client.from("category_types").select("*");
 };
 
+let categoryTypesForBudgetQuery = supabase
+  .from("category_types")
+  .select("budgets_category_types!inner(budget_id)")
+  .eq("budgets_category_types.budget_id", "budgetId");
+
+export type CategoryTypesForBudget = QueryData<
+  typeof categoryTypesForBudgetQuery
+>;
+
 export const fetchCategoryTypesForBudget = async (
   client: SupabaseClient<Database>,
   budgetId: string,
 ) => {
-  return await client.from("category_types").select("*");
+  return await client.from("category_types")
+    .select("*, budgets_category_types!inner(budget_id), category_types(*)")
+    .eq("budgets_category_types.budget_id", budgetId);
 };
+
+let categoryWithChildrenQuery = supabase
+  .from("category_types")
+  .select("*, category_types!parent_id(*)")
+  .single();
+
+export type CategoryWithChildren = QueryData<
+  typeof categoryWithChildrenQuery
+>;
+
+export type CategoriesWithChildren = CategoryWithChildren[];
 
 export async function uploadKeys(payload: Partial<Tables<"users">>) {
   const supabase = await createClient();

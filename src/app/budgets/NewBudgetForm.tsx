@@ -38,7 +38,16 @@ export default function NewBudgetForm() {
       budget,
       extraUser,
     }: {
-      budget: Omit<Tables<"budgets">, "created_at" | "color" | "icon" | "id">;
+      budget: Omit<
+        Tables<"budgets">,
+        | "created_at"
+        | "color"
+        | "icon"
+        | "id"
+        | "default_payday"
+        | "frequency"
+        | "shared"
+      >;
       extraUser: string;
     }) => {
       const supabase = createClient();
@@ -59,9 +68,11 @@ export default function NewBudgetForm() {
 
       const { data: kek, error: kok } = await supabase
         .from("budgets_users")
-        .insert({ budget_id: data.id, user_id: extraUser });
+        .insert({ budget_id: data.id, user_id: extraUser })
+        .select();
 
       console.log(kek);
+      return data;
     },
     onSuccess: async (data: Tables<"budgets">) => {
       console.log(data);
@@ -91,7 +102,16 @@ export default function NewBudgetForm() {
 
     if (!user) throw new Error("You must be logged in!");
 
-    const budget = {
+    const budget: Omit<
+      Tables<"budgets">,
+      | "created_at"
+      | "color"
+      | "icon"
+      | "id"
+      | "default_payday"
+      | "frequency"
+      | "shared"
+    > = {
       description: formData.get("description") as string,
       name: formData.get("name") as string,
       // default: Boolean(formData.get("isDefault")),
@@ -102,7 +122,7 @@ export default function NewBudgetForm() {
 
     console.log(formData.get("user"));
 
-    const data = await mutate({budget, extraUser});
+    const data = await mutate({ budget, extraUser });
   };
 
   return (

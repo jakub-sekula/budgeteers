@@ -36,7 +36,7 @@ export default function BudgetPeriodForm({ budgetId }: { budgetId: string }) {
 
   const { mutate } = useMutation({
     mutationFn: async (
-      budgetEntry: Omit<Tables<"budget_periods">, "created_at" | "id">
+      budgetEntry: Omit<Tables<"budget_periods">, "created_at" | "id" | "is_current">
     ) => {
       const supabase = createClient();
       console.log(budgetEntry);
@@ -77,7 +77,7 @@ export default function BudgetPeriodForm({ budgetId }: { budgetId: string }) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const budgetEntry: Omit<Tables<"budget_periods">, "created_at" | "id"> = {
+    const budgetEntry: Omit<Tables<"budget_periods">, "created_at" | "id" | "is_current"> = {
       budget_id: budgetId,
       // user_id: user.id,
       description: formData.get("description") as string,

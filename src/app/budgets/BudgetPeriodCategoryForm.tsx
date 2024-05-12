@@ -16,7 +16,7 @@ import {
 import { Tables } from "@/types/supabase";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBudgetContext } from "./BudgetContext";
-import { fetchCategories } from "@/utils/supabase/api";
+import { fetchCategoryTypes } from "@/utils/supabase/api";
 
 import {
   Dialog,
@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { useGlobalContext } from "@/components/Providers";
 
 export default function BudgetPeriodCategoryForm() {
   const queryClient = useQueryClient();
@@ -35,11 +36,11 @@ export default function BudgetPeriodCategoryForm() {
   const supabase = createClient();
   const ref = useRef<HTMLFormElement>(null);
 
-  const { selectedBudget, selectedBudgetPeriod } = useBudgetContext();
-
+  // const { selectedBudget, selectedBudgetPeriod } = useBudgetContext();
+  const { defaultBudget, activePeriod } = useGlobalContext();
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
-    queryFn: async () => fetchCategories(supabase),
+    queryFn: async () => fetchCategoryTypes(supabase),
   });
 
   const { data: categories } = categoriesQuery?.data ?? {};
@@ -80,7 +81,7 @@ export default function BudgetPeriodCategoryForm() {
     },
     onSettled: async () =>
       await queryClient.invalidateQueries({
-        queryKey: ["budget_periods", selectedBudget?.id],
+        queryKey: ["budget_periods", defaultBudget?.id],
       }),
   });
 
@@ -98,14 +99,8 @@ export default function BudgetPeriodCategoryForm() {
       Tables<"budget_period_categories">,
       "created_at" | "id" | "icon" | "type" | "budget_id"
     > = {
-      budget_entry_id: selectedBudgetPeriod.id,
-      user_id: user.id,
-      category_id: formData.get("categoryId") as string,
-      description: formData.get("description") as string,
-      name: categories?.find(
-        (category) => category.id === formData.get("categoryId")
-      )?.name as string,
-      hidden: formData.get("hidden") ? true : false,
+      budget_period_id: activePeriod?.id || null,
+      category_type_id: formData.get("categoryId") as string,
       amount: parseFloat(formData.get("amount") as string) * 100,
     };
 
@@ -114,7 +109,7 @@ export default function BudgetPeriodCategoryForm() {
 
   return (
     <>
-      <Dialog className="col-span-4 shrink-0">
+      <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" className="flex gap-2">
             Add category <Plus size={16} />
@@ -123,7 +118,7 @@ export default function BudgetPeriodCategoryForm() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Add category for {selectedBudgetPeriod?.name}
+              Add category for {activePeriod?.name}
             </DialogTitle>
             <DialogDescription>For example May 2024</DialogDescription>
           </DialogHeader>
@@ -179,22 +174,21 @@ export default function BudgetPeriodCategoryForm() {
                 </Select>
               </div>
             </div>
-            
           </form>
-        <DialogFooter className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              toast({ title: "gowno" });
-            }}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" form="budgetEntryCategoryForm">
-            Add
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="flex justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                toast({ title: "gowno" });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" form="budgetEntryCategoryForm">
+              Add
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

@@ -22,11 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fetchAccounts, fetchCategories } from "@/utils/supabase/api";
+import {
+  fetchAccounts,
+  fetchCategoryTypesForBudget,
+} from "@/utils/supabase/api";
 import { Tables } from "@/types/supabase";
 import { useGlobalContext } from "@/components/Providers";
 
-export default function TransactionForm() {
+export default function TransactionForm({
+  budgetPeriodId,
+}: {
+  budgetPeriodId?: string;
+}) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const supabase = createClient();
@@ -34,8 +41,15 @@ export default function TransactionForm() {
   const { defaultBudget, activePeriod } = useGlobalContext();
 
   const categoriesQuery = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => fetchCategories(supabase),
+    queryKey: ["categories", defaultBudget.id],
+    queryFn: async () => {
+      console.log(defaultBudget.id);
+      return await fetchCategoryTypesForBudget(
+        supabase,
+        defaultBudget.id
+      );
+    },
+    enabled: !!defaultBudget.id,
   });
 
   const accountsQuery = useQuery({
@@ -45,6 +59,8 @@ export default function TransactionForm() {
 
   const { data: accounts } = accountsQuery?.data ?? {};
   const { data: categories } = categoriesQuery?.data ?? {};
+
+  console.log(categories);
 
   const { mutate } = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -62,16 +78,17 @@ export default function TransactionForm() {
         | "exclude_from_totals"
         | "id"
         | "budget_category_id"
+        | "category_id"
       > = {
         user_id: user.id,
-        category_id: formData.get("categoryId") as string,
+        category_type_id: formData.get("categoryId") as string,
         from_account: (formData.get("fromAccount") as string) || null,
         to_account: (formData.get("toAccount") as string) || null,
         type: formData.get("type") as string,
         description: formData.get("description") as string,
         amount: Math.trunc(parseFloat(formData.get("amount") as string) * 100),
         budget_id: defaultBudget.id,
-        budget_period_id: activePeriod?.id || null,
+        budget_period_id: budgetPeriodId || activePeriod?.id || null,
       };
 
       const { data, error } = await supabase

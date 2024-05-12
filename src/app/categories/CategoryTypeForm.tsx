@@ -33,7 +33,7 @@ export default function CategoryTypeForm() {
 
   const categoryTypesQuery = useQuery({
     queryKey: ["categoryTypes"],
-    queryFn: async () => await supabase.from("category_types").select("*"),
+    queryFn: async () => await supabase.from("category_types").select("*").is('parent_id', null),
   });
 
   const categoryTypes = categoryTypesQuery.data?.data as

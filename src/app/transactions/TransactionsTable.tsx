@@ -78,7 +78,7 @@ export default function TransactionsTable({
                   )}
                 </TableCell>
                 <TableCell>{transaction.description}</TableCell>
-                <TableCell>{transaction.categories?.name}</TableCell>
+                <TableCell>{transaction.category_types?.name || transaction.categories?.name}</TableCell>
                 <TableCell>{transaction.currency}</TableCell>
                 <TableCell className="text-right">
                   £ {(transaction.amount / 100).toFixed(2)}
