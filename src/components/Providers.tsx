@@ -9,23 +9,28 @@ import {
 import { Toaster } from "./ui/toaster";
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { fetchBudgets } from "@/utils/supabase/api";
+import { fetchBudget, fetchBudgets } from "@/utils/supabase/api";
 import { Tables } from "@/types/supabase";
 import { useLocalStorage } from "@mantine/hooks";
 
 const GlobalContext = createContext<{
   budgets: Tables<"budgets">[];
-  defaultBudget: Tables<"budgets"> | { id: string };
-}>({ budgets: [], defaultBudget: { id: "" } });
+  defaultBudget: Tables<"budgets"> | { id: string; name: string };
+  activePeriod: Tables<"budget_periods"> | undefined;
+}>({
+  budgets: [],
+  defaultBudget: { id: "", name: "" },
+  activePeriod: undefined,
+});
 
 function GlobalProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const [defaultBudget, setDefaultBudget] = useLocalStorage<string>({
     key: "defaultBudget",
-    defaultValue: '{"id":""}',
+    defaultValue: '{"id":"","name":""}',
   });
 
-  const query = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["defaultBudget"],
     queryFn: async () => {
       const {
@@ -50,11 +55,10 @@ function GlobalProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Retrieve the budget name using the default budget ID
-      const { data: budgetData, error: budgetError } = await supabase
-        .from("budgets")
-        .select()
-        .eq("id", userData.default_budget_id)
-        .single();
+      const { data: budgetData, error: budgetError } = await fetchBudget(
+        supabase,
+        userData.default_budget_id
+      );
 
       if (budgetError) {
         console.error("Error fetching budget data:", budgetError);
@@ -81,9 +85,19 @@ function GlobalProvider({ children }: { children: React.ReactNode }) {
     setBudgets(budgetsQuery.data.data);
   }, [budgetsQuery.data]);
 
+  const activePeriod = data?.budget_periods.find(
+    (period) => period.is_current
+  ) as Tables<"budget_periods"> | undefined;
+
+  console.log("active: ", activePeriod);
+
   return (
     <GlobalContext.Provider
-      value={{ defaultBudget: JSON.parse(defaultBudget), budgets }}
+      value={{
+        defaultBudget: JSON.parse(defaultBudget),
+        budgets,
+        activePeriod,
+      }}
     >
       {children}
     </GlobalContext.Provider>

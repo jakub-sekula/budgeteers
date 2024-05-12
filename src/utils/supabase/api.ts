@@ -18,7 +18,8 @@ export const fetchTransactions = async (client: SupabaseClient<Database>) => {
   return transactions;
 };
 
-const budgetsQueryString = "*, category_types (*), budget_periods (name, description, id)";
+const budgetsQueryString =
+  "*, category_types (*), budget_periods (name, description, id, is_current)";
 let budgetsQuery = supabase.from("budgets").select(budgetsQueryString).single();
 export type BudgetWithEntries = QueryData<typeof budgetsQuery>;
 export type BudgetsWithEntries = BudgetWithEntries[];
@@ -45,7 +46,7 @@ export const fetchBudget = async (
 };
 
 const budgetPeriodsQueryString =
-  "*, budget_period_categories (*, categories(*), transactions(*))";
+  "*, budget_period_categories (*, category_types(*), transactions(*))";
 let budgetPeriodsQuery = supabase.from("budget_periods").select(
   budgetPeriodsQueryString,
 ).single();

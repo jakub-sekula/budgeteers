@@ -31,8 +31,7 @@ export default function TransactionForm() {
   const { toast } = useToast();
   const supabase = createClient();
   const ref = useRef<HTMLFormElement>(null);
-  const { defaultBudget } = useGlobalContext();
-
+  const { defaultBudget, activePeriod } = useGlobalContext();
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -56,15 +55,23 @@ export default function TransactionForm() {
 
       if (!user) throw new Error("No user found!");
 
-      const transaction = {
+      const transaction: Omit<
+        Tables<"transactions">,
+        | "created_at"
+        | "currency"
+        | "exclude_from_totals"
+        | "id"
+        | "budget_category_id"
+      > = {
         user_id: user.id,
         category_id: formData.get("categoryId") as string,
-        from_account: (formData.get("fromAccount") as string) || undefined,
-        to_account: (formData.get("toAccount") as string) || undefined,
+        from_account: (formData.get("fromAccount") as string) || null,
+        to_account: (formData.get("toAccount") as string) || null,
         type: formData.get("type") as string,
         description: formData.get("description") as string,
         amount: Math.trunc(parseFloat(formData.get("amount") as string) * 100),
-        budget_id: defaultBudget.id
+        budget_id: defaultBudget.id,
+        budget_period_id: activePeriod?.id || null,
       };
 
       const { data, error } = await supabase

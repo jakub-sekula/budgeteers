@@ -6,9 +6,9 @@ import { createClient } from "@/utils/supabase/client";
 import {
   BudgetPeriodsWithCategories,
   BudgetPeriodWithCategories,
-  fetchBudget,
   fetchBudgetPeriods,
 } from "@/utils/supabase/api";
+import TransactionsTable from "./TransactionsTable";
 
 export default function Page({
   params,
@@ -26,14 +26,30 @@ export default function Page({
     | BudgetPeriodsWithCategories
     | undefined;
 
-  const period = budgetPeriods?.find?.((period) => period.id === params.periodId);
+  const period = budgetPeriods?.find?.(
+    (period) => period.id === params.periodId
+  );
 
-  const budgetQuery = useQuery({
-    queryKey: ["budgets", params.budgetId],
-    queryFn: async () => fetchBudget(supabase, params.budgetId),
+  console.log(period);
+
+  const summaryQuery = useQuery({
+    queryKey: ["budget_summary", params.periodId],
+    queryFn: async () => {
+      let { data, error } = await supabase.rpc(
+        "get_transaction_summary_by_category",
+        {
+          input_budget_id: params.budgetId,
+          input_budget_period_id: params.periodId,
+        }
+      );
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
   });
 
-  const budget = budgetQuery.data?.data;
+  console.log(summaryQuery?.data);
 
   return (
     <>
@@ -41,6 +57,7 @@ export default function Page({
         {period?.name}
       </h1>
       <BudgetPeriodCard period={period as BudgetPeriodWithCategories} />
+      <TransactionsTable periodId={params.periodId} />
     </>
   );
 }

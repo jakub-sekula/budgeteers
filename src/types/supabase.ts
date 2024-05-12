@@ -79,37 +79,37 @@ export type Database = {
         Row: {
           amount: number
           budget_period_id: string | null
-          category_id: string | null
+          category_type_id: string | null
           id: string
           type: Database["public"]["Enums"]["transaction_types"] | null
         }
         Insert: {
           amount?: number
           budget_period_id?: string | null
-          category_id?: string | null
+          category_type_id?: string | null
           id?: string
           type?: Database["public"]["Enums"]["transaction_types"] | null
         }
         Update: {
           amount?: number
           budget_period_id?: string | null
-          category_id?: string | null
+          category_type_id?: string | null
           id?: string
           type?: Database["public"]["Enums"]["transaction_types"] | null
         }
         Relationships: [
           {
-            foreignKeyName: "budget_period_categories_budget_entry_id_fkey"
+            foreignKeyName: "budget_categories_budget_entry_id_fkey"
             columns: ["budget_period_id"]
             isOneToOne: false
             referencedRelation: "budget_periods"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "budget_period_categories_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "budget_period_categories_category_type_id_fkey"
+            columns: ["category_type_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "category_types"
             referencedColumns: ["id"]
           },
         ]
@@ -120,6 +120,7 @@ export type Database = {
           description: string | null
           ends_on: string
           id: string
+          is_current: boolean
           name: string
           starts_on: string
         }
@@ -128,6 +129,7 @@ export type Database = {
           description?: string | null
           ends_on: string
           id?: string
+          is_current?: boolean
           name: string
           starts_on?: string
         }
@@ -136,6 +138,7 @@ export type Database = {
           description?: string | null
           ends_on?: string
           id?: string
+          is_current?: boolean
           name?: string
           starts_on?: string
         }
@@ -353,6 +356,7 @@ export type Database = {
           amount: number
           budget_category_id: string | null
           budget_id: string | null
+          budget_period_id: string | null
           category_id: string | null
           created_at: string
           currency: string
@@ -368,6 +372,7 @@ export type Database = {
           amount: number
           budget_category_id?: string | null
           budget_id?: string | null
+          budget_period_id?: string | null
           category_id?: string | null
           created_at?: string
           currency?: string
@@ -383,6 +388,7 @@ export type Database = {
           amount?: number
           budget_category_id?: string | null
           budget_id?: string | null
+          budget_period_id?: string | null
           category_id?: string | null
           created_at?: string
           currency?: string
@@ -407,6 +413,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_budget_period_id_fkey"
+            columns: ["budget_period_id"]
+            isOneToOne: false
+            referencedRelation: "budget_periods"
             referencedColumns: ["id"]
           },
           {
@@ -507,6 +520,7 @@ export type Database = {
       get_transaction_summary_by_category: {
         Args: {
           input_budget_id: string
+          input_budget_period_id?: string
         }
         Returns: {
           category_name: string
@@ -515,6 +529,10 @@ export type Database = {
           expense: number
           transfer: number
         }[]
+      }
+      update_current_budget_periods: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

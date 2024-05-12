@@ -24,10 +24,12 @@ import {
 } from "@/components/ui/select";
 import { splitExt } from "@/lib/utils";
 import { Database, Tables } from "@/types/supabase";
+import { useGlobalContext } from "@/components/Providers";
 
 export default function CategoryForm() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { defaultBudget } = useGlobalContext();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     const supabase = createClient();
@@ -35,23 +37,18 @@ export default function CategoryForm() {
 
     const formData = new FormData(e.currentTarget);
     const categoryName = formData.get("name") as string;
-    const type = formData.get("type") as string;
     const color = formData.get("color") as string;
-    const icon = formData.get("icon") as File;
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!icon || !user) return;
-
-    const [filename, extension] = splitExt(icon.name);
+    if (!user) return;
 
     const { data, error } = await supabase
-      .from("categories")
+      .from("category_types")
       .insert([
         {
           name: categoryName,
-          transaction_type: type as Database["public"]["Enums"]["transaction_types"],
           color: color,
           user_id: user.id,
         },
@@ -70,57 +67,14 @@ export default function CategoryForm() {
 
     toast({ title: "Successfully created new category" });
 
-
-    const [newCategory] = data;
-
-    if (!icon.name) {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      return;
-    }
-
-    try {
-      const { data: uploadRes, error } = await supabase.storage
-        .from("avatars")
-        .upload(`${user.id}/${filename}-${Date.now()}.${extension}`, icon);
-
-      if (error) {
-        console.error("Error uploading file:", error.message);
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: error.message,
-        });
-      } else {
-        console.log("File uploaded successfully:", uploadRes);
-
-        const { data: uploadData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(uploadRes.path);
-
-        const res = await supabase
-          .from("categories")
-          .update({ icon: uploadData?.publicUrl })
-          .eq("id", newCategory.id);
-
-        console.log(res);
-      }
-    } catch (error: any) {
-      console.error("Error uploading file:", error.message);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: error.message,
-      });
-    }
-
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
+    queryClient.invalidateQueries({ queryKey: ["categoryTypes"] });
   };
 
   return (
     <>
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Add new category</CardTitle>
+          <CardTitle>Add new category type</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} id="categoryForm">

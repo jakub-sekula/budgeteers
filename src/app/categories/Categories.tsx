@@ -40,7 +40,6 @@ export default function Categories() {
 
 
   const deleteCategory = async (id: string) => {
-    // if (!defaultBudget.id) return;
     const supabase = createClient();
     const { error } = await supabase
       .from("budgets_category_types")
@@ -54,6 +53,7 @@ export default function Categories() {
   return (
     <>
       <div className="grid grid-cols-6 gap-4">
+        <h2 className="col-span-full">Budget: {defaultBudget.name }</h2>
         {categories
           // ?.filter(
           //   (category) =>
@@ -69,53 +69,6 @@ export default function Categories() {
           ))}
       </div>
 
-      <Table className="bg-white rounded-md ">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Icon</TableHead>
-            <TableHead>Color</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {categories &&
-            categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell>{category.name}</TableCell>
-                <TableCell>
-                  {/* <Image
-                    src={
-                      category.icon ||
-                      "https://kaekqwmvrbltrhjiklxb.supabase.co/storage/v1/object/public/avatars/avatar.png"
-                    }
-                    height={64}
-                    width={64}
-                    alt=""
-                    className="size-8 rounded-full"
-                  /> */}
-                </TableCell>
-                <TableCell>
-                  <div
-                    className="size-8 rounded-full"
-                    style={{ backgroundColor: category.color as string }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => {
-                      console.log("deleting");
-                      deleteCategory(category.id);
-                    }}
-                    // disabled={category.user_id === null}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
     </>
   );
 }

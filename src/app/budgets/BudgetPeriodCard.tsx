@@ -1,5 +1,4 @@
 import React from "react";
-import { useBudgetContext } from "./BudgetContext";
 import {
   Card,
   CardDescription,
@@ -14,16 +13,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { Button } from "@/components/ui/button";
 
 import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { BudgetPeriodWithCategories } from "@/utils/supabase/api";
-import { usePathname, useRouter } from "next/navigation";
-import slugify from "slugify";
-import { slugifyWithId } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import { useGlobalContext } from "@/components/Providers";
+import CategoryTransactionForm from "@/app/budgets/CategoryTransactionForm";
+import CategoryTransaction from "./CategoryTransaction";
 
 export default function BudgetPeriodCard({
   period,
@@ -32,7 +32,6 @@ export default function BudgetPeriodCard({
 }) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const pathname = usePathname();
 
   const { defaultBudget } = useGlobalContext();
 
@@ -66,23 +65,25 @@ export default function BudgetPeriodCard({
     });
   };
 
+
   if (!period) return null;
 
+  console.log(period);
   return (
     <Card
       key={period.id}
       onClick={() => {
-        // setdefaultBudgetPeriod(period);
         router.push(`/budgets/${defaultBudget.id}/${period.id}`);
       }}
       className={clsx(
         defaultBudget?.id === period.id ? "bg-sky-100" : null,
-        "col-span-8"
+        "col-span-full"
       )}
     >
       <CardHeader>
         <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight lg:text-3xl">
           {period.name}
+          {period.is_current ? " - (active)" : null}
           <Button
             onClick={(e) => {
               e.stopPropagation();
@@ -116,39 +117,43 @@ export default function BudgetPeriodCard({
         <TableHeader>
           <TableRow>
             <TableHead>Category</TableHead>
-            <TableHead>Description</TableHead>
             <TableHead>Children</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {period.budget_period_categories.map((category) => (
-            <TableRow key={category.id}>
-              <TableCell>{category?.categories?.name}</TableCell>
-              {/* <TableCell>{category.description}</TableCell> */}
-              <TableCell>
-                <ul>
-                  {category?.transactions?.map((transaction) => (
-                    <li key={period.id}>
-                      {transaction.description} - £{" "}
-                      {(transaction.amount / 100).toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              </TableCell>
-              <TableCell>£ {(category.amount / 100).toFixed(2)}</TableCell>
-              <TableCell>
-                <Button
-                  onClick={() => {
-                    deleteCategory(category.id);
-                  }}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {period.budget_period_categories
+            .slice() // Create a shallow copy of the array to avoid mutating the original array
+            .sort((a, b) =>
+              a.category_types!.name.localeCompare(b.category_types!.name)
+            )
+            .map((category) => (
+              <TableRow key={category.id}>
+                <TableCell>{category?.category_types?.name}</TableCell>
+                <TableCell>
+                  <ul>
+                    {category?.transactions?.map((transaction) => (
+                      <CategoryTransaction
+                        key={transaction.id}
+                        transaction={transaction}
+                      />
+                    ))}
+                  </ul>
+                </TableCell>
+                <TableCell>£ {(category.amount / 100).toFixed(2)}</TableCell>
+                <TableCell>
+                  <Button
+                    onClick={() => {
+                      deleteCategory(category.id);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  <CategoryTransactionForm categoryId={category.id} />
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </Card>
