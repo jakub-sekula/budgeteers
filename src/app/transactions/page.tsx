@@ -6,7 +6,10 @@ import {
 } from "@tanstack/react-query";
 
 import { createClient } from "@/utils/supabase/server";
-import { fetchTransactions } from "@/utils/supabase/api";
+import {
+  budgetsQueryString,
+  transactionsQueryString,
+} from "@/utils/supabase/api";
 import TransactionsTable from "./TransactionsTable";
 
 export default async function page() {
@@ -19,16 +22,25 @@ export default async function page() {
   }
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: ["transactions"],
-    queryFn: async () => await fetchTransactions(supabase),
-  });
+
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ["transactions"],
+      queryFn: async () => {
+        return supabase.from("transactions").select(transactionsQueryString);
+      },
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["budgets"],
+      queryFn: async () => {
+        return supabase.from("budgets").select(budgetsQueryString);
+      },
+    }),
+  ]);
 
   return (
-    <>
-      <HydrationBoundary state={dehydrate(queryClient)}>
-          <TransactionsTable queryString={queryString} />
-      </HydrationBoundary>
-    </>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <TransactionsTable queryString={queryString} />
+    </HydrationBoundary>
   );
 }

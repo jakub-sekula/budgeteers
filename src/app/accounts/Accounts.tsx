@@ -24,7 +24,7 @@ export default function Accounts() {
 
   const query = useQuery({
     queryKey: ["accounts"],
-    queryFn: async () => await fetchAccounts(supabase),
+    queryFn: fetchAccounts,
   });
 
   const accounts = query.data?.data as Tables<"accounts">[] | undefined;

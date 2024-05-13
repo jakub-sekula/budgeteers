@@ -20,7 +20,7 @@ export default async function page() {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["accounts"],
-    queryFn: async () => await fetchAccounts(supabase),
+    queryFn: fetchAccounts,
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

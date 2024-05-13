@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 
 import { Tables } from "@/types/supabase";
-import { CategoriesWithChildren, fetchBudget } from "@/utils/supabase/api";
+import { CategoryTypesWithChildren, fetchBudget } from "@/utils/supabase/api";
 import CategoryCard from "./CategoryCard";
 import { useGlobalContext } from "@/components/Providers";
 
@@ -14,11 +14,11 @@ export default function Categories() {
 
   const query = useQuery({
     queryKey: ["budgets", defaultBudget.id],
-    queryFn: async () => fetchBudget(supabase, defaultBudget.id),
+    queryFn: async () => fetchBudget(defaultBudget.id),
   });
 
   const categories = query.data?.data?.category_types as
-    | CategoriesWithChildren
+    | CategoryTypesWithChildren
     | undefined;
 
   return (

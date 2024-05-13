@@ -6,7 +6,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { Toaster } from "./ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { fetchBudget, fetchBudgets } from "@/utils/supabase/api";
@@ -16,10 +16,12 @@ import { useLocalStorage } from "@mantine/hooks";
 const GlobalContext = createContext<{
   budgets: Tables<"budgets">[];
   defaultBudget: Tables<"budgets"> | { id: string; name: string };
+  setDefaultBudget?: Function | undefined; 
   activePeriod: Tables<"budget_periods"> | undefined;
 }>({
   budgets: [],
   defaultBudget: { id: "", name: "" },
+  setDefaultBudget: undefined,
   activePeriod: undefined,
 });
 
@@ -56,7 +58,6 @@ function GlobalProvider({ children }: { children: React.ReactNode }) {
 
       // Retrieve the budget name using the default budget ID
       const { data: budgetData, error: budgetError } = await fetchBudget(
-        supabase,
         userData.default_budget_id
       );
 
@@ -77,7 +78,7 @@ function GlobalProvider({ children }: { children: React.ReactNode }) {
 
   const budgetsQuery = useQuery({
     queryKey: ["budgets"],
-    queryFn: async () => fetchBudgets(supabase),
+    queryFn: fetchBudgets,
   });
 
   useEffect(() => {
@@ -85,16 +86,15 @@ function GlobalProvider({ children }: { children: React.ReactNode }) {
     setBudgets(budgetsQuery.data.data);
   }, [budgetsQuery.data]);
 
-  const activePeriod = data?.budget_periods.find(
+  const activePeriod = data?.budget_periods?.find(
     (period) => period.is_current
   ) as Tables<"budget_periods"> | undefined;
-
-  console.log("active: ", activePeriod);
 
   return (
     <GlobalContext.Provider
       value={{
         defaultBudget: JSON.parse(defaultBudget),
+        setDefaultBudget,
         budgets,
         activePeriod,
       }}

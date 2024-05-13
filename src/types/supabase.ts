@@ -439,7 +439,7 @@ export type Database = {
             foreignKeyName: "Transactions_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "category_types"
             referencedColumns: ["id"]
           },
           {

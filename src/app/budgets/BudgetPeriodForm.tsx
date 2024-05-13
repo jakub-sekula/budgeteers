@@ -35,15 +35,13 @@ export default function BudgetPeriodForm({ budgetId }: { budgetId: string }) {
   const { budgets } = useGlobalContext();
 
   const { mutate } = useMutation({
-    mutationFn: async (
-      budgetEntry: Omit<Tables<"budget_periods">, "created_at" | "id" | "is_current">
-    ) => {
+    mutationFn: async (budgetEntry: Partial<Tables<"budget_periods">>) => {
       const supabase = createClient();
       console.log(budgetEntry);
 
       const { data, error } = await supabase
         .from("budget_periods")
-        .insert([budgetEntry])
+        .insert([budgetEntry as Tables<"budget_periods">])
         .select()
         .single();
 
@@ -54,7 +52,6 @@ export default function BudgetPeriodForm({ budgetId }: { budgetId: string }) {
       return data;
     },
     onSuccess: async (data: Tables<"budget_periods">) => {
-      console.log(data);
       toast({ title: "Successfully created new budget entry" });
       queryClient.invalidateQueries({
         queryKey: ["budget_periods", budgetId],
@@ -77,7 +74,7 @@ export default function BudgetPeriodForm({ budgetId }: { budgetId: string }) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const budgetEntry: Omit<Tables<"budget_periods">, "created_at" | "id" | "is_current"> = {
+    const budgetEntry: Partial<Tables<"budget_periods">> = {
       budget_id: budgetId,
       // user_id: user.id,
       description: formData.get("description") as string,
@@ -143,10 +140,9 @@ export default function BudgetPeriodForm({ budgetId }: { budgetId: string }) {
                 />
               </div>
             </div>
-           
           </form>
           <DialogFooter>
-          <Button
+            <Button
               type="button"
               variant="outline"
               onClick={() => {

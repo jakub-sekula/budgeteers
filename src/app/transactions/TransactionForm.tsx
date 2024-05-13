@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  createTransaction,
   fetchAccounts,
   fetchCategoryTypesForBudget,
 } from "@/utils/supabase/api";
@@ -34,75 +35,28 @@ export default function TransactionForm({
 }: {
   budgetPeriodId?: string;
 }) {
+  const supabase = createClient();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const supabase = createClient();
-  const ref = useRef<HTMLFormElement>(null);
   const { defaultBudget, activePeriod } = useGlobalContext();
 
   const categoriesQuery = useQuery({
-    queryKey: ["categories", defaultBudget.id],
-    queryFn: async () => {
-      console.log(defaultBudget.id);
-      return await fetchCategoryTypesForBudget(
-        supabase,
-        defaultBudget.id
-      );
-    },
+    queryKey: ["category_types", defaultBudget?.id],
+    queryFn: async () => fetchCategoryTypesForBudget(defaultBudget.id),
     enabled: !!defaultBudget.id,
   });
 
   const accountsQuery = useQuery({
     queryKey: ["accounts"],
-    queryFn: async () => fetchAccounts(supabase),
+    queryFn: fetchAccounts,
   });
 
   const { data: accounts } = accountsQuery?.data ?? {};
   const { data: categories } = categoriesQuery?.data ?? {};
 
-  console.log(categories);
-
   const { mutate } = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) throw new Error("No user found!");
-
-      const transaction: Omit<
-        Tables<"transactions">,
-        | "created_at"
-        | "currency"
-        | "exclude_from_totals"
-        | "id"
-        | "budget_category_id"
-        | "category_id"
-      > = {
-        user_id: user.id,
-        category_type_id: formData.get("categoryId") as string,
-        from_account: (formData.get("fromAccount") as string) || null,
-        to_account: (formData.get("toAccount") as string) || null,
-        type: formData.get("type") as string,
-        description: formData.get("description") as string,
-        amount: Math.trunc(parseFloat(formData.get("amount") as string) * 100),
-        budget_id: defaultBudget.id,
-        budget_period_id: budgetPeriodId || activePeriod?.id || null,
-      };
-
-      const { data, error } = await supabase
-        .from("transactions")
-        .insert([transaction])
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return data;
-    },
+    mutationFn: async (transaction: Tables<"transactions">) =>
+      createTransaction(transaction),
     onSuccess: async (data) => {
       console.log(data);
       toast({ title: "Successfully created new transaction" });
@@ -122,7 +76,28 @@ export default function TransactionForm({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await mutate(new FormData(e.currentTarget));
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("No user found!");
+
+    const formData = new FormData(e.target as HTMLFormElement);
+
+    const transaction: Partial<Tables<"transactions">> = {
+      user_id: user.id,
+      category_type_id: formData.get("categoryId") as string,
+      from_account: (formData.get("fromAccount") as string) || null,
+      to_account: (formData.get("toAccount") as string) || null,
+      type: formData.get("type") as string,
+      description: (formData.get("description") as string) || null,
+      amount: Math.trunc(parseFloat(formData.get("amount") as string) * 100),
+      budget_id: defaultBudget.id,
+      budget_period_id: budgetPeriodId || activePeriod?.id || null,
+    };
+
+    await mutate(transaction as Tables<"transactions">);
   };
 
   return (
@@ -132,7 +107,7 @@ export default function TransactionForm({
           <CardTitle>Add new transaction</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} id="categoryForm" ref={ref}>
+          <form onSubmit={handleSubmit} id="categoryForm">
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="description">Description</Label>

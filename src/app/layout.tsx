@@ -6,7 +6,6 @@ import Nav from "@/components/Nav";
 import clsx from "clsx";
 
 const inter = Inter({ subsets: ["latin"] });
-export const dynamic = 'force-dynamic' 
 
 export const metadata: Metadata = {
   title: "Budget tracker",
@@ -25,7 +24,9 @@ export default function RootLayout({
       >
         <Providers>
           <Nav />
-          <main className="max-w-6xl w-full mx-auto py-6 grid gap-6">{children}</main>
+          <main className="max-w-6xl w-full mx-auto py-6 grid gap-6">
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

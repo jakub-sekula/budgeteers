@@ -35,7 +35,6 @@ export default function CategoryTransactionForm({
   const ref = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
 
-
   const { mutate } = useMutation({
     mutationFn: async (formData: FormData) => {
       const supabase = createClient();
@@ -49,7 +48,7 @@ export default function CategoryTransactionForm({
         user_id: user.id,
         amount: Math.trunc(parseFloat(formData.get("amount") as string) * 100),
         budget_category_id: categoryId,
-        description: formData.get("description") as string
+        description: formData.get("description") as string,
       };
 
       const { data, error } = await supabase
@@ -67,7 +66,7 @@ export default function CategoryTransactionForm({
     onSuccess: async (data) => {
       console.log(data);
       toast({ title: "Successfully created new transaction" });
-      setOpen(false)
+      setOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ["budget_periods"],
       });
@@ -91,7 +90,13 @@ export default function CategoryTransactionForm({
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button>Add transaction</Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            Add transaction
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

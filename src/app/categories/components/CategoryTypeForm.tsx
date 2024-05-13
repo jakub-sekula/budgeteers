@@ -32,7 +32,7 @@ export default function CategoryTypeForm() {
   const { defaultBudget } = useGlobalContext();
 
   const categoryTypesQuery = useQuery({
-    queryKey: ["categoryTypes"],
+    queryKey: ["category_types"],
     queryFn: async () => await supabase.from("category_types").select("*").is('parent_id', null),
   });
 

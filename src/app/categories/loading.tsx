@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
   } from "@/components/ui/table";
-import CategoryForm from "./CategoryForm";
+import CategoryForm from "./components/CategoryForm";
   
   export default function loading() {
 	return (

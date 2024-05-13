@@ -67,13 +67,9 @@ export default function BudgetPeriodCard({
 
   if (!period) return null;
 
-  console.log(period);
   return (
     <Card
       key={period.id}
-      onClick={() => {
-        router.push(`/budgets/${defaultBudget.id}/${period.id}`);
-      }}
       className={clsx(
         defaultBudget?.id === period.id ? "bg-sky-100" : null,
         "col-span-full"
@@ -90,6 +86,13 @@ export default function BudgetPeriodCard({
             }}
           >
             Delete
+          </Button>
+          <Button
+            onClick={() => {
+              router.push(`/budgets/${defaultBudget.id}/${period.id}`);
+            }}
+          >
+            Deets
           </Button>
         </CardTitle>
         <CardDescription className="flex gap-4">
@@ -117,7 +120,6 @@ export default function BudgetPeriodCard({
           <TableRow>
             <TableHead>Category</TableHead>
             <TableHead>Children</TableHead>
-            <TableHead>Type</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -145,7 +147,8 @@ export default function BudgetPeriodCard({
                 <TableCell>{category.type}</TableCell>
                 <TableCell>
                   <Button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       deleteCategory(category.id);
                     }}
                   >

@@ -33,9 +33,11 @@ import { Input } from "@/components/ui/input";
 import { Ban, Lock } from "lucide-react";
 import { useGlobalContext } from "@/components/Providers";
 import {
-  CategoriesWithChildren,
-  CategoryWithChildren,
+  CategoryTypesWithChildren,
+  CategoryTypeWithChildren,
+  fetchCategoryTypeWithChildren,
 } from "@/utils/supabase/api";
+import CategoryEditForm from "./CategoryEditForm";
 
 const iconColors = {
   red: { bg: "border-red-200 bg-red-100", icon: "text-red-600" },
@@ -76,12 +78,11 @@ export default function CategoryCard({
   category,
   className,
 }: {
-  category: CategoryWithChildren;
+  category: CategoryTypeWithChildren;
   className?: string;
 }) {
   const queryClient = useQueryClient();
   const { defaultBudget } = useGlobalContext();
-  console.log(category);
 
   const deleteCategory = async (id: string) => {
     const supabase = createClient();
@@ -96,19 +97,17 @@ export default function CategoryCard({
   return (
     <Dialog>
       <ContextMenu>
-        <ContextMenuTrigger className={twMerge("", className)}>
+        <ContextMenuTrigger
+          className={twMerge("", className)}
+          onMouseEnter={() => {
+            queryClient.prefetchQuery({
+              queryKey: ["category_types", category.id],
+              queryFn: async () => fetchCategoryTypeWithChildren(category.id),
+            });
+          }}
+        >
           <Card>
             <CardHeader className="flex-row gap-4 p-4 space-y-0">
-              {/* <Image
-          src={
-            category.icon ||
-            "https://kaekqwmvrbltrhjiklxb.supabase.co/storage/v1/object/public/avatars/avatar.png"
-          }
-          height={64}
-          width={64}
-          alt=""
-          className="size-10 rounded-md"
-        /> */}
               <div
                 className={clsx(
                   "size-10 rounded-md flex items-center justify-center border-2",
@@ -122,16 +121,6 @@ export default function CategoryCard({
                       "text-neutral-600"
                   )}
                 />
-                {/* <Icon
-                  className={clsx(
-                    iconColors[category.color as IconColorKey]?.icon ||
-                      "text-neutral-600"
-                  )}
-                  name={
-                    (category?.icon as keyof typeof dynamicIconImports) ||
-                    "users"
-                  }
-                /> */}
               </div>
               <div className="flex flex-col m-0">
                 <CardTitle className="text-base flex gap-2 items-center">
@@ -141,7 +130,6 @@ export default function CategoryCard({
                   ) : null}
                 </CardTitle>
                 <CardDescription className="capitalize leading-none">
-                  {/* {category.transaction_type} */}
                   {category.category_types ? (
                     <ul>
                       {category.category_types.map((child) => (
@@ -166,34 +154,8 @@ export default function CategoryCard({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit category</DialogTitle>
-          <DialogDescription></DialogDescription>
         </DialogHeader>
-        <form onSubmit={(e) => e.preventDefault()} id="categoryForm">
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                placeholder="Category name"
-                required
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="color">Color label</Label>
-              <input
-                type="color"
-                id="color"
-                name="color"
-                defaultValue="#ff00ff"
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5 overflow-hidden">
-              <Label htmlFor="icon">Icon</Label>
-              <input type="file" id="icon" name="icon" />
-            </div>
-          </div>
-        </form>
+        <CategoryEditForm categoryId={category.id} />
       </DialogContent>
     </Dialog>
   );

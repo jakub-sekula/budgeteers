@@ -24,10 +24,9 @@ import { useGlobalContext } from "@/components/Providers";
 
 export default function BudgetsTable() {
   const router = useRouter();
-  const supabase = createClient();
   const budgetsQuery = useQuery({
     queryKey: ["budgets"],
-    queryFn: async () => fetchBudgets(supabase),
+    queryFn: fetchBudgets,
   });
 
   const queryClient = useQueryClient();

@@ -19,9 +19,8 @@ export default async function page() {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["budgets"],
-    queryFn: async () => fetchBudgets(supabase),
+    queryFn: fetchBudgets,
   });
-
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

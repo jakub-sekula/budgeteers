@@ -14,11 +14,9 @@ export default function AccountForm() {
     const accountName = formData.get("name") as string;
     const accountType = formData.get("type") as string;
 
-    console.log(accountName);
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    console.log(user);
 
     if (!user) return;
 
@@ -33,7 +31,6 @@ export default function AccountForm() {
 
     queryClient.invalidateQueries({ queryKey: ["accounts"] });
 
-    console.log(data);
   };
 
   return (

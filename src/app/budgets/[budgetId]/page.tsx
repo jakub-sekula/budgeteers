@@ -6,13 +6,23 @@ import { fetchBudget } from "@/utils/supabase/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import BudgetPeriodForm from "../BudgetPeriodForm";
 import BudgetPeriodCategoryForm from "../BudgetPeriodCategoryForm";
+import { useEffect } from "react";
+import { useGlobalContext } from "@/components/Providers";
+import { useRouter } from "next/navigation";
 
 export default function Page({ params }: { params: { budgetId: string } }) {
   const supabase = createClient();
   const budgetsQuery = useQuery({
     queryKey: ["budgets", params.budgetId],
-    queryFn: async () => fetchBudget(supabase, params.budgetId),
+    queryFn: async () => fetchBudget(params.budgetId),
   });
+
+  const { defaultBudget } = useGlobalContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push(`/budgets/${defaultBudget.id}`);
+  }, [defaultBudget, router]);
 
   const budget = budgetsQuery.data?.data;
 
@@ -31,8 +41,6 @@ export default function Page({ params }: { params: { budgetId: string } }) {
       return data;
     },
   });
-
-  console.log(summaryQuery?.data);
 
   return (
     <>

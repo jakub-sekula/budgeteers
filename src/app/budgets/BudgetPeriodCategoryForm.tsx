@@ -39,18 +39,15 @@ export default function BudgetPeriodCategoryForm() {
   // const { selectedBudget, selectedBudgetPeriod } = useBudgetContext();
   const { defaultBudget, activePeriod } = useGlobalContext();
   const categoriesQuery = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => fetchCategoryTypes(supabase),
+    queryKey: ["category_types"],
+    queryFn: fetchCategoryTypes,
   });
 
   const { data: categories } = categoriesQuery?.data ?? {};
 
   const { mutate } = useMutation({
     mutationFn: async (
-      budgetCategory: Omit<
-        Tables<"budget_period_categories">,
-        "created_at" | "id" | "icon"
-      >
+      budgetCategory: Partial<Tables<"budget_period_categories">>
     ) => {
       const supabase = createClient();
       console.log(budgetCategory);
@@ -68,7 +65,6 @@ export default function BudgetPeriodCategoryForm() {
       return data;
     },
     onSuccess: async (data: Tables<"budget_period_categories">) => {
-      console.log(data);
       toast({ title: "Successfully created new budget" });
     },
     onError: (error) => {
@@ -95,10 +91,7 @@ export default function BudgetPeriodCategoryForm() {
 
     if (!user) throw new Error("You must be logged in!");
 
-    const budgetEntry: Omit<
-      Tables<"budget_period_categories">,
-      "created_at" | "id" | "icon" | "type" | "budget_id"
-    > = {
+    const budgetEntry: Partial<Tables<"budget_period_categories">> = {
       budget_period_id: activePeriod?.id || null,
       category_type_id: formData.get("categoryId") as string,
       amount: parseFloat(formData.get("amount") as string) * 100,
@@ -117,9 +110,7 @@ export default function BudgetPeriodCategoryForm() {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              Add category for {activePeriod?.name}
-            </DialogTitle>
+            <DialogTitle>Add category for {activePeriod?.name}</DialogTitle>
             <DialogDescription>For example May 2024</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} id="budgetEntryCategoryForm" ref={ref}>

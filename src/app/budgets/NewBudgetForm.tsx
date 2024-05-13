@@ -38,23 +38,14 @@ export default function NewBudgetForm() {
       budget,
       extraUser,
     }: {
-      budget: Omit<
-        Tables<"budgets">,
-        | "created_at"
-        | "color"
-        | "icon"
-        | "id"
-        | "default_payday"
-        | "frequency"
-        | "shared"
-      >;
+      budget: Partial<Tables<"budgets">>;
       extraUser: string;
     }) => {
       const supabase = createClient();
 
       const { data, error } = await supabase
         .from("budgets")
-        .insert([budget])
+        .insert([budget as Tables<"budgets">])
         .select()
         .single();
 
@@ -62,16 +53,13 @@ export default function NewBudgetForm() {
         throw new Error(error?.message);
       }
 
-      console.log("giwno: ", extraUser);
-
       if (!extraUser) return data;
 
-      const { data: kek, error: kok } = await supabase
+      await supabase
         .from("budgets_users")
         .insert({ budget_id: data.id, user_id: extraUser })
         .select();
 
-      console.log(kek);
       return data;
     },
     onSuccess: async (data: Tables<"budgets">) => {
@@ -83,7 +71,7 @@ export default function NewBudgetForm() {
       return data;
     },
     onError: (error) => {
-      console.log("kurwa", error);
+      console.log(error);
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
@@ -102,16 +90,7 @@ export default function NewBudgetForm() {
 
     if (!user) throw new Error("You must be logged in!");
 
-    const budget: Omit<
-      Tables<"budgets">,
-      | "created_at"
-      | "color"
-      | "icon"
-      | "id"
-      | "default_payday"
-      | "frequency"
-      | "shared"
-    > = {
+    const budget: Partial<Tables<"budgets">> = {
       description: formData.get("description") as string,
       name: formData.get("name") as string,
       // default: Boolean(formData.get("isDefault")),
@@ -120,9 +99,7 @@ export default function NewBudgetForm() {
 
     const extraUser = formData.get("user") as string;
 
-    console.log(formData.get("user"));
-
-    const data = await mutate({ budget, extraUser });
+    mutate({ budget, extraUser });
   };
 
   return (

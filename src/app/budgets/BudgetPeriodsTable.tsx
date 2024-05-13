@@ -16,7 +16,7 @@ export default function BudgetPeriodsTable({ budgetId }: { budgetId: string }) {
 
   const budgetPeriodsQuery = useQuery({
     queryKey: ["budget_periods", budgetId],
-    queryFn: async () => fetchBudgetPeriods(supabase, budgetId),
+    queryFn: async () => fetchBudgetPeriods( budgetId),
   });
 
   const budgetPeriods = budgetPeriodsQuery.data?.data as

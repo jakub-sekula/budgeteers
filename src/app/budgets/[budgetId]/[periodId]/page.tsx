@@ -20,7 +20,7 @@ export default function Page({
 
   const budgetPeriodsQuery = useQuery({
     queryKey: ["budget_periods", params.budgetId],
-    queryFn: async () => fetchBudgetPeriods(supabase, params.budgetId),
+    queryFn: async () => fetchBudgetPeriods(params.budgetId),
   });
 
   const budgetPeriods = budgetPeriodsQuery.data?.data as
@@ -39,8 +39,8 @@ export default function Page({
       let { data, error } = await supabase.rpc(
         "get_transaction_summary_by_category",
         {
-          input_budget_id: params.budgetId,
-          input_budget_period_id: params.periodId,
+          input_budget_id: params?.budgetId,
+          input_budget_period_id: params?.periodId,
         }
       );
       if (error) {
@@ -49,8 +49,6 @@ export default function Page({
       return data;
     },
   });
-
-  console.log(summaryQuery?.data);
 
   return (
     <>

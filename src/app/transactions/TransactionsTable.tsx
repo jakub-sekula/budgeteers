@@ -24,11 +24,11 @@ export default function TransactionsTable({
 }: {
   queryString: string;
 }) {
-  const supabase = createClient();
   const queryClient = useQueryClient();
+  
   const query = useQuery({
     queryKey: ["transactions"],
-    queryFn: async () => await fetchTransactions(supabase),
+    queryFn: fetchTransactions,
   });
 
   const { budgets } = useGlobalContext();
@@ -78,7 +78,7 @@ export default function TransactionsTable({
                   )}
                 </TableCell>
                 <TableCell>{transaction.description}</TableCell>
-                <TableCell>{transaction.category_types?.name || transaction.categories?.name}</TableCell>
+                <TableCell>{transaction.category_types?.name}</TableCell>
                 <TableCell>{transaction.currency}</TableCell>
                 <TableCell className="text-right">
                   £ {(transaction.amount / 100).toFixed(2)}

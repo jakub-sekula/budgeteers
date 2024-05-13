@@ -67,7 +67,7 @@ export default function CategoryForm() {
 
     toast({ title: "Successfully created new category" });
 
-    queryClient.invalidateQueries({ queryKey: ["categoryTypes"] });
+    queryClient.invalidateQueries({ queryKey: ["category_types"] });
   };
 
   return (
