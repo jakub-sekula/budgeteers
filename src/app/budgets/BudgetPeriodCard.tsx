@@ -128,8 +128,9 @@ export default function BudgetPeriodCard({
           {period.budget_period_categories
             .slice() // Create a shallow copy of the array to avoid mutating the original array
             .sort((a, b) => {
-              if (!a.category_types?.name || !b.category_types?.name) return;
-              return a.category_types.name.localeCompare(b.category_types.name);
+              const nameA = a.category_types?.name || "";
+              const nameB = b.category_types?.name || "";
+              return nameA.localeCompare(nameB);
             })
             .map((category) => (
               <TableRow key={category.id}>
@@ -155,7 +156,7 @@ export default function BudgetPeriodCard({
                   >
                     Delete
                   </Button>
-                  <CategoryTransactionForm categoryId={category.id}  />
+                  <CategoryTransactionForm categoryId={category.id} />
                 </TableCell>
               </TableRow>
             ))}
