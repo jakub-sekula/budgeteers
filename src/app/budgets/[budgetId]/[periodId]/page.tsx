@@ -10,6 +10,7 @@ import {
 } from "@/utils/supabase/api";
 import TransactionsTable from "./TransactionsTable";
 import TransactionForm from "@/app/transactions/TransactionForm";
+import BudgetPeriodCategoryForm from "../../BudgetPeriodCategoryForm";
 
 export default function Page({
   params,
@@ -52,10 +53,14 @@ export default function Page({
 
   return (
     <>
-      <h1 className="col-span-full scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-        {period?.name}
-      </h1>
-      <BudgetPeriodCard period={period as BudgetPeriodWithCategories} />
+      <div className="flex col-span-full gap-6 items-center">
+        <h1 className="col-span-full scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+          {period?.name}
+        </h1>
+        <BudgetPeriodCategoryForm period={period!} />
+      </div>
+
+      <BudgetPeriodCard period={period!} />
       <div className="flex col-span-full">
         <TransactionForm budgetPeriodId={params.periodId} />
         <TransactionsTable periodId={params.periodId} />

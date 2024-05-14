@@ -1,6 +1,6 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { FormEvent, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -22,52 +22,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { splitExt } from "@/lib/utils";
-import { Database, Tables } from "@/types/supabase";
-import { useGlobalContext } from "@/components/Providers";
+import { Tables } from "@/types/supabase";
+import { createCategoryType } from "@/utils/supabase/api";
 
 export default function CategoryForm() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { defaultBudget } = useGlobalContext();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    const supabase = createClient();
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-    const categoryName = formData.get("name") as string;
-    const color = formData.get("color") as string;
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("category_types")
-      .insert([
-        {
-          name: categoryName,
-          color: color,
-          user_id: user.id,
-        },
-      ])
-      .select();
-
-    if (error) {
+  const { mutate } = useMutation({
+    mutationFn: async (category_type: Tables<"category_types">) =>
+      await createCategoryType(category_type),
+    onSuccess: async (data: Tables<"category_types">) => {
+      toast({ title: `Successfully created new category type ${data.name}`});
+      queryClient.invalidateQueries({ queryKey: ["category_types"] });
+    },
+    onError: (error) => {
       console.log(error);
+      queryClient.invalidateQueries({ queryKey: ["category_types"] });
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: error.message,
       });
-      return;
-    }
+    },
+  });
 
-    toast({ title: "Successfully created new category" });
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.currentTarget);
+    const categoryName = formData.get("name") as string;
+    const color = formData.get("color") as string;
+    
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-    queryClient.invalidateQueries({ queryKey: ["category_types"] });
+    const category = {
+      name: categoryName,
+      color: color,
+      user_id: user.id,
+    };
+
+    mutate(category as Tables<"category_types">);
   };
 
   return (

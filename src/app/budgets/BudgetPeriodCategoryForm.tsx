@@ -16,7 +16,10 @@ import {
 import { Tables } from "@/types/supabase";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBudgetContext } from "./BudgetContext";
-import { fetchCategoryTypes } from "@/utils/supabase/api";
+import {
+  BudgetPeriodWithCategories,
+  fetchCategoryTypes,
+} from "@/utils/supabase/api";
 
 import {
   Dialog,
@@ -30,7 +33,11 @@ import {
 import { Plus } from "lucide-react";
 import { useGlobalContext } from "@/components/Providers";
 
-export default function BudgetPeriodCategoryForm() {
+export default function BudgetPeriodCategoryForm({
+  period,
+}: {
+  period: BudgetPeriodWithCategories;
+}) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const supabase = createClient();
@@ -44,6 +51,8 @@ export default function BudgetPeriodCategoryForm() {
   });
 
   const { data: categories } = categoriesQuery?.data ?? {};
+
+  console.log(period?.budget_period_categories);
 
   const { mutate } = useMutation({
     mutationFn: async (
@@ -100,12 +109,31 @@ export default function BudgetPeriodCategoryForm() {
     mutate(budgetEntry as Tables<"budget_period_categories">);
   };
 
+  const availableCategories = categories?.filter(
+    (category) =>
+      !period?.budget_period_categories
+        ?.map((bpc) => bpc.category_types?.name)
+        .includes(category.name)
+  );
+
+  const allCategoriesAssigned = availableCategories?.length === 0;
+
   return (
     <>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" className="flex gap-2">
-            Add category <Plus size={16} />
+          <Button
+            variant="outline"
+            className="flex gap-2"
+            disabled={allCategoriesAssigned}
+          >
+            {allCategoriesAssigned ? (
+              "All categories assigned"
+            ) : (
+              <>
+                Add category <Plus size={16} />
+              </>
+            )}
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -153,10 +181,16 @@ export default function BudgetPeriodCategoryForm() {
                 <Label htmlFor="categoryId">Category</Label>
                 <Select name="categoryId" required>
                   <SelectTrigger id="type">
-                    <SelectValue placeholder="Select" />
+                    <SelectValue
+                      placeholder={
+                        availableCategories?.length
+                          ? "Select"
+                          : "All categories assigned"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    {categories?.map((category) => (
+                    {availableCategories?.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>

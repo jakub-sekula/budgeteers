@@ -41,10 +41,6 @@ export default async function page() {
         </h1>
         <div className="grid gap-6 w-full">
           <Categories />
-          <div className="flex gap-6">
-            <CategoryForm />
-            <CategoryTypeForm />
-          </div>
         </div>
       </HydrationBoundary>
     </>

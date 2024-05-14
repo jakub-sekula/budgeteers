@@ -1,6 +1,7 @@
 // import Icon from "@/components/Icon";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -76,9 +77,11 @@ type IconColorKey = keyof typeof iconColors;
 
 export default function CategoryCard({
   category,
+  type = "linked",
   className,
 }: {
   category: CategoryTypeWithChildren;
+  type?: "default" | "linked";
   className?: string;
 }) {
   const queryClient = useQueryClient();
@@ -86,13 +89,27 @@ export default function CategoryCard({
 
   const deleteCategory = async (id: string) => {
     const supabase = createClient();
-    const { error } = await supabase
-      .from("budgets_category_types")
-      .delete()
-      .eq("category_type_id", id)
-      .eq("budget_id", defaultBudget.id);
-    if (error) return console.log(error);
-    queryClient.invalidateQueries({ queryKey: ["budgets", defaultBudget.id] });
+    switch (type) {
+      case "default":
+        await supabase
+          .from("category_types")
+          .delete()
+          .eq("id", id);
+
+        queryClient.invalidateQueries({
+          queryKey: ["category_types"],
+        });
+      case "linked":
+        await supabase
+          .from("budgets_category_types")
+          .delete()
+          .eq("category_type_id", id)
+          .eq("budget_id", defaultBudget?.id);
+
+        queryClient.invalidateQueries({
+          queryKey: ["budgets", defaultBudget.id],
+        });
+    }
   };
   return (
     <Dialog>
@@ -129,7 +146,7 @@ export default function CategoryCard({
                     <Lock size={16} className="text-neutral-500" />
                   ) : null}
                 </CardTitle>
-                <CardDescription className="capitalize leading-none">
+                <CardContent className="capitalize leading-none p-0 text-sm text-neutral-600">
                   {category.category_types ? (
                     <ul>
                       {category.category_types.map((child) => (
@@ -137,7 +154,7 @@ export default function CategoryCard({
                       ))}
                     </ul>
                   ) : null}
-                </CardDescription>
+                </CardContent>
               </div>
             </CardHeader>
           </Card>
@@ -146,7 +163,12 @@ export default function CategoryCard({
           <DialogTrigger asChild>
             <ContextMenuItem>Edit</ContextMenuItem>
           </DialogTrigger>
-          <ContextMenuItem onClick={() => deleteCategory(category.id)}>
+          <ContextMenuItem
+            onClick={() => {
+              console.log("deleting!");
+              deleteCategory(category.id);
+            }}
+          >
             Delete
           </ContextMenuItem>
         </ContextMenuContent>

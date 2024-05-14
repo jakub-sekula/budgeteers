@@ -50,7 +50,6 @@ export default function Page({ params }: { params: { budgetId: string } }) {
           {budget?.name || <Skeleton className="w-48 h-12" />}
         </h1>
         <BudgetPeriodForm budgetId={params.budgetId} />
-        <BudgetPeriodCategoryForm />
       </div>
       <BudgetPeriodsTable budgetId={params.budgetId} />
       {/* </HydrationBoundary> */}

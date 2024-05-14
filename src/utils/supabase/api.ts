@@ -30,7 +30,9 @@ export const fetchTransaction = async (
     .single();
 };
 
-export const createTransaction = async (transaction: Tables<"transactions">) => {
+export const createTransaction = async (
+  transaction: Tables<"transactions">,
+) => {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -44,7 +46,7 @@ export const createTransaction = async (transaction: Tables<"transactions">) => 
   }
 
   return data;
-}
+};
 
 // Budgets functions
 
@@ -111,6 +113,11 @@ export const fetchAccounts = async () => {
   return supabase.from("accounts").select("*");
 };
 
+export const fetchAccount = async (accountId: string) => {
+  const supabase = createClient();
+  return supabase.from("accounts").select("*").eq("id", accountId);
+};
+
 // Category types functions
 
 export type CategoryType = Tables<"category_types">;
@@ -119,6 +126,40 @@ export type CategoryTypes = CategoryType[];
 export const fetchCategoryTypes = async () => {
   const supabase = createClient();
   return supabase.from("category_types").select("*");
+};
+
+export const createCategoryType = async (
+  categoryType: Partial<Tables<"category_types">>,
+) => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("category_types")
+    .insert([categoryType as Tables<"category_types">])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+export const updateCategoryType = async (
+  categoryType: Partial<Tables<"category_types">>,
+) => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("category_types")
+    .upsert([categoryType as Tables<"category_types">])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 };
 
 let categoryTypesForBudgetQuery = supabase
@@ -157,6 +198,13 @@ export const fetchCategoryTypeWithChildren = async (
     .select("*, category_types!parent_id(*)")
     .eq("id", categoryId)
     .single();
+};
+
+export const fetchCategoryTypesWithChildren = async (
+) => {
+  const supabase = createClient();
+  return supabase.from("category_types")
+    .select("*, category_types!parent_id(*)")
 };
 
 // Crypto key functions

@@ -33,31 +33,33 @@ export default function CategoryTypeForm() {
 
   const categoryTypesQuery = useQuery({
     queryKey: ["category_types"],
-    queryFn: async () => await supabase.from("category_types").select("*").is('parent_id', null),
+    queryFn: async () =>
+      await supabase.from("category_types").select("*").is("parent_id", null),
   });
 
   const categoryTypes = categoryTypesQuery.data?.data as
     | Tables<"category_types">[]
     | undefined;
 
-  console.log(categoryTypes);
-
   const { mutate } = useMutation({
-    mutationFn: async (category_type_id:string) => {
+    mutationFn: async (category_type_id: string) => {
       const supabase = createClient();
 
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-  
-      const { data, error } = await supabase
-        .from("budgets_category_types")
-        .upsert({ budget_id: defaultBudget.id, category_type_id: category_type_id });
-  
+
+      const { error } = await supabase.from("budgets_category_types").upsert({
+        budget_id: defaultBudget.id,
+        category_type_id: category_type_id,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
     },
-    onSuccess: async (data) => {
-      console.log(data);
+    onSuccess: async () => {
       toast({ title: "Successfully added" });
       await queryClient.invalidateQueries({
         queryKey: ["budgets", defaultBudget.id],
@@ -74,11 +76,11 @@ export default function CategoryTypeForm() {
   });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-   e.preventDefault()
-   const formData = new FormData(e.currentTarget);
-   const type = formData.get("type") as string;
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const type = formData.get("type") as string;
 
-   mutate(type)
+    mutate(type);
   };
 
   return (
